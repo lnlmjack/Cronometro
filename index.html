@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Relógio</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        /* Área superior e Display */
+        .top-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-top: 40px;
+            max-height: 44vh;
+        }
+        .timer-display {
+            font-size: clamp(4.2rem, 19vw, 5.6rem);
+            font-weight: 200;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1.5px;
+            line-height: 1;
+            text-align: center;
+        }
+
+        /* Controles (Botões e Pontinhos) */
+        .controls-wrapper {
+            width: 100%;
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #1c1c1e;
+        }
+        .btn {
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.05rem;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: filter 0.1s;
+        }
+        .btn:active {
+            filter: brightness(1.3);
+        }
+        .btn-left {
+            background-color: #2c2c2e;
+            color: #ffffff;
+        }
+        .btn-left.disabled {
+            background-color: #1c1c1e;
+            color: #8e8e93;
+        }
+        .btn-right.start {
+            background-color: #092911;
+            color: #32d74b;
+        }
+        .btn-right.stop {
+            background-color: #330d0b;
+            color: #ff453a;
+        }
+
+        .dots {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #48484a;
+        }
+        .dot.active {
+            background-color: #ffffff;
+        }
+
+        /* Lista de Voltas */
+        .laps-area {
+            flex: 1;
+            width: 100%;
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 0 20px;
+            overflow-y: auto;
+        }
+        .lap-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 11px 0;
+            border-bottom: 1px solid #1c1c1e;
+            font-size: 1rem;
+            font-variant-numeric: tabular-nums;
+            color: #ffffff;
+        }
+
+        /* Barra de Navegação Inferior (Estilo Pílula iOS) */
+        .bottom-nav-container {
+            width: 100%;
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 10px 18px calc(16px + env(safe-area-inset-bottom));
+        }
+        .bottom-nav {
+            background-color: #161618;
+            border-radius: 40px;
+            padding: 5px 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #262629;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 0;
+            border-radius: 32px;
+            color: #dcdce0;
+            font-size: 0.65rem;
+            font-weight: 500;
+            gap: 3px;
+            cursor: pointer;
+        }
+        .nav-item.active {
+            background-color: #050505;
+            color: #ff9f0a;
+        }
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modal Secreto do Mágico */
+        .secret-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .secret-box {
+            background: #1c1c1e;
+            border: 1px solid #38383a;
+            border-radius: 18px;
+            padding: 22px;
+            width: 100%;
+            max-width: 320px;
+            color: #fff;
+        }
+        .secret-box h3 {
+            margin: 0 0 16px 0;
+            font-size: 1.15rem;
+            text-align: center;
+            color: #ff9f0a;
+        }
+        .secret-box label {
+            display: block;
+            font-size: 0.85rem;
+            color: #aeaeb2;
+            margin-bottom: 6px;
+        }
+        .secret-box select, .secret-box input {
+            width: 100%;
+            padding: 11px;
+            margin-bottom: 16px;
+            background: #2c2c2e;
+            border: 1px solid #3a3a3c;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .secret-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .secret-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-save {
+            background: #ff9f0a;
+            color: #000;
+        }
+        .btn-cancel {
+            background: #3a3a3c;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Topo e Display (3 toques rápidos no topo também abrem o menu secreto) -->
+    <div class="top-area" id="secretTriggerTop">
+        <div class="timer-display" id="display">00:00,00</div>
+    </div>
+
+    <!-- Botões e Linha Divisória -->
+    <div class="controls-wrapper">
+        <div class="controls">
+            <button class="btn btn-left disabled" id="leftBtn">Volta</button>
+            <div class="dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+            </div>
+            <button class="btn btn-right start" id="rightBtn">Iniciar</button>
+        </div>
+    </div>
+
+    <!-- Espaço das Voltas -->
+    <div class="laps-area" id="lapsArea"></div>
+
+    <!-- Barra Inferior igual ao iOS novo -->
+    <div class="bottom-nav-container">
+        <div class="bottom-nav">
+            <!-- Relógio -->
+            <div class="nav-item">
+                <div class="nav-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="12" cy="12" r="9.5"/>
+                        <ellipse cx="12" cy="12" rx="4.5" ry="9.5"/>
+                        <line x1="2.8" y1="9" x2="21.2" y2="9"/>
+                        <line x1="2.8" y1="15" x2="21.2" y2="15"/>
+                        <line x1="12" y1="2.5" x2="12" y2="21.5"/>
+                    </svg>
+                </div>
+                <span>Relógio</span>
+            </div>
+            <!-- Alarmes -->
+            <div class="nav-item">
+                <div class="nav-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M5.6 3.2L2.4 6.1l1.3 1.4 3.2-2.9-1.3-1.4zm12.8 0l-1.3 1.4 3.2 2.9 1.3-1.4-3.2-2.9zM12 5a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm0 14a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm.7-9.5h-1.5v4.2l3.2 1.9.8-1.2-2.5-1.5V9.5z"/>
+                    </svg>
+                </div>
+                <span>Alarmes</span>
+            </div>
+            <!-- Cronômetro (3 toques rápidos aqui abrem a configuração secreta) -->
+            <div class="nav-item active" id="secretTriggerBottom">
+                <div class="nav-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9.5 1.5h5v2h-5v-2zm2.5 3.5a8.5 8.5 0 1 0 8.5 8.5A8.5 8.5 0 0 0 12 5zm.8 8.9l-2.6-2.6 1.1-1.1 1.5 1.5V8.5h1.5v4.7z M18.4 5.2l1.4-1.4 1.4 1.4-1.4 1.4z"/>
+                    </svg>
+                </div>
+                <span>Cronômetro</span>
+            </div>
+            <!-- Timers -->
+            <div class="nav-item">
+                <div class="nav-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M12 3v3"/>
+                        <path d="M12 12L8.5 8.5"/>
+                        <path d="M5.6 5.6a9 9 0 1 0 6.4-2.6"/>
+                    </svg>
+                </div>
+                <span>Timers</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Janela Secreta de Configuração -->
+    <div class="secret-modal" id="secretModal">
+        <div class="secret-box">
+            <h3>Configuração Secreta</h3>
+            <label for="forceMode">Tipo de Forçagem:</label>
+            <select id="forceMode">
+                <option value="multiple">Múltiplo de (Ex: 9 -> 9, 18, 27)</option>
+                <option value="exact">Soma Exata (Ex: sempre 15)</option>
+                <option value="off">Desativado (Cronômetro Normal)</option>
+            </select>
+
+            <label for="forceValue">Número Alvo:</label>
+            <input type="number" id="forceValue" min="1" max="50" value="9">
+
+            <div class="secret-actions">
+                <button class="btn-cancel" id="cancelSecret">Fechar</button>
+                <button class="btn-save" id="saveSecret">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Carrega configurações salvas ou usa Múltiplo de 9 como padrão
+        let forceMode = localStorage.getItem('magic_mode') || 'multiple';
+        let targetValue = parseInt(localStorage.getItem('magic_target') || '9', 10);
+
+        let startTime = 0;
+        let elapsedTime = 0;
+        let lastLapTime = 0;
+        let timerInterval = null;
+        let isRunning = false;
+        let lapCount = 0;
+
+        const display = document.getElementById('display');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const lapsArea = document.getElementById('lapsArea');
+
+        function sumDigits(str) {
+            let sum = 0;
+            for (let ch of str) {
+                if (ch >= '0' && ch <= '9') sum += parseInt(ch, 10);
+            }
+            return sum;
+        }
+
+        function formatTime(ms) {
+            const minutes = Math.floor(ms / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
+            const centiseconds = Math.floor((ms % 1000) / 10);
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(centiseconds).padStart(2, '0')}`;
+        }
+
+        function getForcedTimeString(ms) {
+            if (forceMode === 'off' || targetValue <= 0) {
+                return formatTime(ms);
+            }
+
+            const minutes = Math.floor(ms / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
+            const actualCs = Math.floor((ms % 1000) / 10);
+
+            const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const baseSum = sumDigits(minSecStr);
+
+            let bestCs = actualCs;
+            let minDiff = 999;
+
+            for (let cs = 0; cs < 100; cs++) {
+                let csStr = String(cs).padStart(2, '0');
+                let totalSum = baseSum + sumDigits(csStr);
+
+                let isMatch = false;
+                if (forceMode === 'exact') {
+                    isMatch = (totalSum === targetValue);
+                } else if (forceMode === 'multiple') {
+                    isMatch = (totalSum > 0 && totalSum % targetValue === 0);
+                }
+
+                if (isMatch) {
+                    let diff = Math.abs(cs - actualCs);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        bestCs = cs;
+                    }
+                }
+            }
+
+            // Se escolheu Soma Exata mas os minutos+segundos já passaram do valor, garante ao menos um múltiplo
+            if (minDiff === 999) {
+                for (let cs = 0; cs < 100; cs++) {
+                    let csStr = String(cs).padStart(2, '0');
+                    let totalSum = baseSum + sumDigits(csStr);
+                    if (totalSum > 0 && totalSum % targetValue === 0) {
+                        let diff = Math.abs(cs - actualCs);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            bestCs = cs;
+                        }
+                    }
+                }
+            }
+
+            return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
+        }
+
+        rightBtn.addEventListener('click', () => {
+            if (!isRunning) {
+                isRunning = true;
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    display.textContent = formatTime(elapsedTime);
+                }, 16);
+
+                rightBtn.className = 'btn btn-right stop';
+                rightBtn.textContent = 'Parar';
+                leftBtn.className = 'btn btn-left';
+                leftBtn.textContent = 'Volta';
+            } else {
+                clearInterval(timerInterval);
+                isRunning = false;
+                elapsedTime = Date.now() - startTime;
+
+                const finalStr = getForcedTimeString(elapsedTime);
+                display.textContent = finalStr;
+
+                rightBtn.className = 'btn btn-right start';
+                rightBtn.textContent = 'Iniciar';
+                leftBtn.className = 'btn btn-left';
+                leftBtn.textContent = 'Zerar';
+            }
+        });
+
+        leftBtn.addEventListener('click', () => {
+            if (isRunning) {
+                // Registra uma volta se clicado enquanto roda
+                lapCount++;
+                const lapTime = elapsedTime - lastLapTime;
+                lastLapTime = elapsedTime;
+                const row = document.createElement('div');
+                row.className = 'lap-row';
+                row.innerHTML = `<span>Volta ${lapCount}</span><span>${formatTime(lapTime)}</span>`;
+                lapsArea.prepend(row);
+            } else if (elapsedTime > 0) {
+                // Zera o cronômetro
+                elapsedTime = 0;
+                lastLapTime = 0;
+                lapCount = 0;
+                display.textContent = '00:00,00';
+                lapsArea.innerHTML = '';
+                leftBtn.className = 'btn btn-left disabled';
+                leftBtn.textContent = 'Volta';
+            }
+        });
+
+        // Lógica do Menu Secreto (3 toques rápidos no ícone Cronômetro ou no topo)
+        const modal = document.getElementById('secretModal');
+        const modeSelect = document.getElementById('forceMode');
+        const valueInput = document.getElementById('forceValue');
+
+        function setupSecretTrigger(element) {
+            let taps = 0;
+            let timer = null;
+            element.addEventListener('click', () => {
+                taps++;
+                clearTimeout(timer);
+                if (taps === 3) {
+                    taps = 0;
+                    modeSelect.value = forceMode;
+                    valueInput.value = targetValue;
+                    modal.style.display = 'flex';
+                } else {
+                    timer = setTimeout(() => { taps = 0; }, 450);
+                }
+            });
+        }
+
+        setupSecretTrigger(document.getElementById('secretTriggerBottom'));
+        setupSecretTrigger(document.getElementById('secretTriggerTop'));
+
+        document.getElementById('saveSecret').addEventListener('click', () => {
+            forceMode = modeSelect.value;
+            const val = parseInt(valueInput.value, 10);
+            if (!isNaN(val) && val > 0) {
+                targetValue = val;
+            }
+            localStorage.setItem('magic_mode', forceMode);
+            localStorage.setItem('magic_target', targetValue);
+            modal.style.display = 'none';
+        });
+
+        document.getElementById('cancelSecret').addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
