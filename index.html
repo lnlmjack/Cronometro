@@ -27,10 +27,10 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. Mostrador do Relógio posicionado exatamente na proporção original */
+        /* 1. Mostrador do Relógio */
         .display-container {
             position: absolute;
-            top: 15.5vh;
+            top: calc(env(safe-area-inset-top, 0px) + 11vh);
             left: 0;
             width: 100%;
             display: flex;
@@ -38,10 +38,10 @@
             justify-content: center;
         }
         .timer-display {
-            font-size: 19.2vw;
+            font-size: clamp(56px, 22vw, 108px);
             font-weight: 100;
             font-variant-numeric: tabular-nums;
-            letter-spacing: -0.5px;
+            letter-spacing: -1px;
             line-height: 1;
             color: #ffffff;
             text-align: center;
@@ -51,11 +51,11 @@
         /* 2. Botões Volta / Iniciar e Linha Divisória */
         .controls-wrapper {
             position: absolute;
-            top: 42.5vh;
+            top: calc(env(safe-area-inset-top, 0px) + 38vh);
             left: 0;
             right: 0;
             width: 100%;
-            padding: 0 18px;
+            padding: 0 20px;
         }
         .controls {
             display: flex;
@@ -65,10 +65,8 @@
             border-bottom: 0.5px solid #1c1c1e;
         }
         .btn {
-            width: 20.5vw;
-            height: 20.5vw;
-            max-width: 82px;
-            max-height: 82px;
+            width: clamp(70px, 21vw, 88px);
+            height: clamp(70px, 21vw, 88px);
             border-radius: 50%;
             border: none;
             font-size: 1.05rem;
@@ -120,12 +118,12 @@
         /* 3. Lista de Voltas */
         .laps-area {
             position: absolute;
-            top: 54.5vh;
-            bottom: 12vh;
+            top: calc(env(safe-area-inset-top, 0px) + 49vh);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 13vh);
             left: 0;
             right: 0;
             width: 100%;
-            padding: 0 18px;
+            padding: 0 20px;
             overflow-y: auto;
         }
         .lap-row {
@@ -138,14 +136,14 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior com distanciamento milimétrico exato */
+        /* 4. Barra Inferior */
         .bottom-nav-container {
             position: absolute;
-            bottom: 3.2vh;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
             left: 0;
             right: 0;
             width: 100%;
-            padding: 0 18px;
+            padding: 0 20px;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
@@ -252,7 +250,6 @@
 </head>
 <body>
 
-    <!-- 3 toques rápidos no topo ou no ícone do cronômetro abrem o menu secreto -->
     <div class="display-container" id="secretTriggerTop">
         <div class="timer-display" id="display">00:00,00</div>
     </div>
