@@ -127,7 +127,7 @@
         .laps-area {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 49vh);
-            height: 34vh;
+            height: 30vh;
             left: 0;
             right: 0;
             width: 100%;
@@ -145,12 +145,12 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior Trancada sem Oscilação */
+        /* 4. Barra Inferior Subida e Trancada */
         .bottom-nav-container {
             position: fixed;
             left: 0;
             right: 0;
-            bottom: 32px;
+            bottom: 58px;
             width: 100%;
             padding: 0 20px;
             z-index: 40;
@@ -358,14 +358,13 @@
     </div>
 
     <script>
-        // Trava a barra inferior usando a altura física real do iPhone para nunca oscilar
+        // Subi a barra em 58 pixels (de screenH - 92 para screenH - 150) para nunca cortar
         function lockBottomBarPosition() {
             const nav = document.getElementById('bottomNavContainer');
             const screenH = window.screen.height;
             if (screenH && screenH > 500) {
-                // 60px de altura da barra + 32px de distância até a borda inferior (idêntico à foto real_2.jpg)
                 nav.style.bottom = 'auto';
-                nav.style.top = (screenH - 92) + 'px';
+                nav.style.top = (screenH - 150) + 'px';
             }
         }
         lockBottomBarPosition();
