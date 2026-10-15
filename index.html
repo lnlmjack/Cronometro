@@ -127,7 +127,7 @@
         .laps-area {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 49vh);
-            height: 30vh;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 85px);
             left: 0;
             right: 0;
             width: 100%;
@@ -145,12 +145,12 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior */
+        /* 4. Barra Inferior Estável */
         .bottom-nav-container {
-            position: fixed;
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
             left: 0;
             right: 0;
-            bottom: 58px;
             width: 100%;
             padding: 0 20px;
             z-index: 40;
@@ -280,7 +280,7 @@
 
     <div class="laps-area" id="lapsArea"></div>
 
-    <div class="bottom-nav-container" id="bottomNavContainer">
+    <div class="bottom-nav-container">
         <div class="bottom-nav">
             <div class="nav-item">
                 <div class="nav-icon">
@@ -358,16 +358,12 @@
     </div>
 
     <script>
-        function lockBottomBarPosition() {
-            const nav = document.getElementById('bottomNavContainer');
-            const screenH = window.screen.height;
-            if (screenH && screenH > 500) {
-                nav.style.bottom = 'auto';
-                nav.style.top = (screenH - 150) + 'px';
+        // Força o reset de estado ao abrir pelo atalho do iOS para evitar travamentos de cache
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                window.location.reload();
             }
-        }
-        lockBottomBarPosition();
-        window.addEventListener('resize', lockBottomBarPosition);
+        });
 
         let forceMode = localStorage.getItem('magic_mode') || 'multiple';
         let targetValue = parseInt(localStorage.getItem('magic_target') || '9', 10);
@@ -406,11 +402,10 @@
 
             const minutes = Math.floor(ms / 60000);
             const seconds = Math.floor((ms % 60000) / 1000);
-            const actualCs = Math.floor((ms % 1000) / 10);
-
             const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             const baseSum = sumDigits(minSecStr);
 
+            const actualCs = Math.floor((ms % 1000) / 10);
             let bestCs = actualCs;
             let minDiff = 999;
 
@@ -434,16 +429,24 @@
                 }
             }
 
+            // Fallback de segurança caso nenhum centésimo bata exatamente no modo exato restrito
+            if (minDiff === 999 && forceMode === 'exact') {
+                for (let cs = 0; cs < 100; cs++) {
+                    let csStr = String(cs).padStart(2, '0');
+                    let totalSum = baseSum + sumDigits(csStr);
+                    let diff = Math.abs(totalSum - targetValue);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        bestCs = cs;
+                    }
+                }
+            }
+
             return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
         }
 
-        let lastRightTouch = 0;
         function toggleTimer(e) {
-            if (e.type === 'touchstart') {
-                lastRightTouch = Date.now();
-            } else if (e.type === 'click' && Date.now() - lastRightTouch < 500) {
-                return;
-            }
+            if (e) e.preventDefault();
 
             if (!isRunning) {
                 isRunning = true;
@@ -472,13 +475,8 @@
             }
         }
 
-        let lastLeftTouch = 0;
         function lapOrReset(e) {
-            if (e.type === 'touchstart') {
-                lastLeftTouch = Date.now();
-            } else if (e.type === 'click' && Date.now() - lastLeftTouch < 500) {
-                return;
-            }
+            if (e) e.preventDefault();
 
             if (isRunning) {
                 lapCount++;
@@ -499,10 +497,7 @@
             }
         }
 
-        rightBtn.addEventListener('touchstart', toggleTimer, { passive: true });
         rightBtn.addEventListener('click', toggleTimer);
-
-        leftBtn.addEventListener('touchstart', lapOrReset, { passive: true });
         leftBtn.addEventListener('click', lapOrReset);
 
         const modal = document.getElementById('secretModal');
@@ -512,16 +507,9 @@
         function setupSecretTrigger(element) {
             let taps = 0;
             let lastTapTime = 0;
-            let lastTouchEvent = 0;
             if (!element) return;
 
-            function registerTap(e) {
-                if (e.type === 'touchstart') {
-                    lastTouchEvent = Date.now();
-                } else if (e.type === 'click' && Date.now() - lastTouchEvent < 500) {
-                    return;
-                }
-
+            element.addEventListener('click', (e) => {
                 const now = Date.now();
                 if (now - lastTapTime < 500) {
                     taps++;
@@ -536,10 +524,7 @@
                     valueInput.value = targetValue;
                     modal.style.display = 'flex';
                 }
-            }
-
-            element.addEventListener('touchstart', registerTap, { passive: true });
-            element.addEventListener('click', registerTap);
+            });
         }
 
         setupSecretTrigger(document.getElementById('secretTriggerBottom'));
