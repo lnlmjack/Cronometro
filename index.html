@@ -36,6 +36,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
         }
         .timer-display {
             font-size: clamp(56px, 22vw, 108px);
@@ -451,7 +452,7 @@
                 rightBtn.className = 'btn btn-right start';
                 rightBtn.textContent = 'Iniciar';
                 leftBtn.className = 'btn btn-left';
-                leftBtn.textContent = 'Volta';
+                leftBtn.textContent = 'Zerar';
             }
         });
 
@@ -482,6 +483,7 @@
         function setupSecretTrigger(element) {
             let taps = 0;
             let timer = null;
+            if (!element) return;
             element.addEventListener('click', () => {
                 taps++;
                 clearTimeout(timer);
@@ -491,7 +493,7 @@
                     valueInput.value = targetValue;
                     modal.style.display = 'flex';
                 } else {
-                    timer = setTimeout(() => { taps = 0; }, 450);
+                    timer = setTimeout(() => { taps = 0; }, 500);
                 }
             });
         }
