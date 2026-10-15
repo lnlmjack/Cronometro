@@ -27,7 +27,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. Mostrador do Relógio */
         .display-container {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 11vh);
@@ -36,7 +35,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
         }
         .timer-display {
             font-size: clamp(56px, 22vw, 108px);
@@ -49,7 +47,6 @@
             width: 100%;
         }
 
-        /* 2. Botões Volta / Iniciar e Linha Divisória */
         .controls-wrapper {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 38vh);
@@ -99,7 +96,6 @@
             color: #ff453a;
         }
 
-        /* Pontinhos Centrais */
         .dots {
             display: flex;
             gap: 8px;
@@ -116,11 +112,10 @@
             background-color: #ffffff;
         }
 
-        /* 3. Lista de Voltas */
         .laps-area {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 49vh);
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 13vh);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
             left: 0;
             right: 0;
             width: 100%;
@@ -137,14 +132,13 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior */
         .bottom-nav-container {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+            bottom: env(safe-area-inset-bottom, 0px);
             left: 0;
             right: 0;
             width: 100%;
-            padding: 0 20px;
+            padding: 0 20px 8px 20px;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
@@ -184,7 +178,6 @@
             justify-content: center;
         }
 
-        /* Janela Secreta de Configuração */
         .secret-modal {
             display: none;
             position: fixed;
@@ -452,7 +445,7 @@
                 rightBtn.className = 'btn btn-right start';
                 rightBtn.textContent = 'Iniciar';
                 leftBtn.className = 'btn btn-left';
-                leftBtn.textContent = 'Zerar';
+                leftBtn.textContent = 'Volta';
             }
         });
 
@@ -483,7 +476,6 @@
         function setupSecretTrigger(element) {
             let taps = 0;
             let timer = null;
-            if (!element) return;
             element.addEventListener('click', () => {
                 taps++;
                 clearTimeout(timer);
@@ -493,7 +485,7 @@
                     valueInput.value = targetValue;
                     modal.style.display = 'flex';
                 } else {
-                    timer = setTimeout(() => { taps = 0; }, 500);
+                    timer = setTimeout(() => { taps = 0; }, 450);
                 }
             });
         }
