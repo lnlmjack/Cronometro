@@ -29,7 +29,7 @@
         }
 
         .top-spacer {
-            height: 8vh;
+            height: 7vh;
             width: 100%;
         }
 
@@ -39,13 +39,13 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            padding: 0 10px;
+            padding: 0 8px;
         }
         .timer-display {
-            font-size: 18.2vw;
+            font-size: 19.2vw;
             font-weight: 100;
             font-variant-numeric: tabular-nums;
-            letter-spacing: 0px;
+            letter-spacing: -0.5px;
             line-height: 1;
             color: #ffffff;
             text-align: center;
@@ -63,17 +63,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #161618;
+            padding-bottom: 18px;
+            border-bottom: 0.5px solid #1c1c1e;
         }
         .btn {
-            width: 18.5vw;
-            height: 18.5vw;
-            max-width: 78px;
-            max-height: 78px;
+            width: 20vw;
+            height: 20vw;
+            max-width: 82px;
+            max-height: 82px;
             border-radius: 50%;
             border: none;
-            font-size: 0.98rem;
+            font-size: 1.05rem;
             font-weight: 400;
             letter-spacing: -0.2px;
             display: flex;
@@ -132,24 +132,24 @@
             display: flex;
             justify-content: space-between;
             padding: 12px 0;
-            border-bottom: 1px solid #161618;
-            font-size: 1rem;
+            border-bottom: 0.5px solid #1c1c1e;
+            font-size: 1.05rem;
             font-variant-numeric: tabular-nums;
             color: #ffffff;
         }
 
-        /* Barra Inferior Corrigida Sem Cortes */
+        /* Barra Inferior Perfeitamente Alinhada e Sem Cortes */
         .bottom-nav-container {
             width: 100%;
             max-width: 430px;
             margin: 0 auto;
-            padding: 4px 16px calc(14px + env(safe-area-inset-bottom, 0px)) 16px;
+            padding: 6px 16px calc(18px + env(safe-area-inset-bottom, 0px)) 16px;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
-            border-radius: 44px;
-            padding: 3px;
-            height: 58px;
+            border-radius: 46px;
+            padding: 4px;
+            height: 62px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -163,12 +163,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 38px;
+            border-radius: 40px;
             color: #e5e5ea;
-            font-size: 0.62rem;
+            font-size: 0.68rem;
             font-weight: 500;
             letter-spacing: -0.1px;
-            gap: 1px;
+            gap: 2px;
             cursor: pointer;
         }
         .nav-item.active {
@@ -176,8 +176,8 @@
             color: #ff9f0a;
         }
         .nav-icon {
-            width: 25px;
-            height: 25px;
+            width: 27px;
+            height: 27px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -273,7 +273,7 @@
         <div class="bottom-nav">
             <div class="nav-item">
                 <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.6">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.6">
                         <circle cx="12" cy="12" r="9.5"/>
                         <ellipse cx="12" cy="12" rx="4.8" ry="9.5"/>
                         <line x1="2.5" y1="12" x2="21.5" y2="12"/>
@@ -287,7 +287,7 @@
 
             <div class="nav-item">
                 <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
                         <path d="M3.2 6.4L6.8 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
                         <path d="M20.8 6.4L17.2 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
                         <circle cx="12" cy="12.8" r="8.5" fill="#ffffff"/>
@@ -301,7 +301,7 @@
 
             <div class="nav-item active" id="secretTriggerBottom">
                 <div class="nav-icon">
-                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
+                    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
                         <rect x="10.6" y="1.2" width="2.8" height="2.6" rx="0.8" fill="#ff9f0a"/>
                         <path d="M17.2 6.0L19.2 4.0" stroke="#ff9f0a" stroke-width="2.4" stroke-linecap="round"/>
                         <circle cx="12" cy="13.2" r="8.6" fill="#ff9f0a"/>
@@ -314,7 +314,7 @@
 
             <div class="nav-item">
                 <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
                         <path d="M12 2.8V6.2" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
                         <path d="M12 2.8 A 9.2 9.2 0 1 1 5.0 6.0" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
                         <path d="M12 12L8.2 8.4" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
@@ -503,7 +503,7 @@
 
         document.getElementById('saveSecret').addEventListener('click', () => {
             forceMode = modeSelect.value;
-            const val = parseInt(valueInput.value, 10);
+            val = parseInt(valueInput.value, 10);
             if (!isNaN(val) && val > 0) {
                 targetValue = val;
             }
