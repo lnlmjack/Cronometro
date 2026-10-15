@@ -17,7 +17,8 @@
             margin: 0;
             padding: 0;
             width: 100vw;
-            height: 100vh;
+            height: 100%;
+            min-height: 100dvh;
             background-color: #000000;
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
@@ -27,7 +28,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. Mostrador do Relógio (Topo exato preservado) */
+        /* 1. Mostrador do Relógio (PROIBIDO MEXER - Intacto conforme o teu modelo) */
         .display-container {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 11vh);
@@ -37,6 +38,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            z-index: 5;
         }
         .timer-display {
             font-size: clamp(56px, 22vw, 108px);
@@ -49,7 +51,7 @@
             width: 100%;
         }
 
-        /* 2. Botões Volta / Iniciar e Linha Divisória */
+        /* 2. Botões Volta / Iniciar e Linha Divisória (Intacto) */
         .controls-wrapper {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 38vh);
@@ -57,6 +59,7 @@
             right: 0;
             width: 100%;
             padding: 0 20px;
+            z-index: 5;
         }
         .controls {
             display: flex;
@@ -78,6 +81,7 @@
             justify-content: center;
             cursor: pointer;
             padding: 0;
+            touch-action: manipulation;
         }
         .btn:active {
             filter: brightness(1.35);
@@ -126,6 +130,7 @@
             width: 100%;
             padding: 0 20px;
             overflow-y: auto;
+            z-index: 2;
         }
         .lap-row {
             display: flex;
@@ -137,14 +142,15 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior Ajustada Exatamente igual à foto real */
+        /* 4. Barra Inferior (Subida milimetricamente para o espaço seguro e com toque garantido) */
         .bottom-nav-container {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
             left: 0;
             right: 0;
             width: 100%;
             padding: 0 20px;
+            z-index: 10;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
@@ -171,6 +177,7 @@
             letter-spacing: -0.1px;
             gap: 2px;
             cursor: pointer;
+            touch-action: manipulation;
         }
         .nav-item.active {
             background-color: #08080a;
@@ -428,7 +435,8 @@
             return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
         }
 
-        rightBtn.addEventListener('click', () => {
+        rightBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             if (!isRunning) {
                 isRunning = true;
                 startTime = Date.now() - elapsedTime;
@@ -456,7 +464,8 @@
             }
         });
 
-        leftBtn.addEventListener('click', () => {
+        leftBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             if (isRunning) {
                 lapCount++;
                 const lapTime = elapsedTime - lastLapTime;
