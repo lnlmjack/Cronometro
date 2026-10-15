@@ -358,7 +358,6 @@
     </div>
 
     <script>
-        // Força o reset de estado ao abrir pelo atalho do iOS para evitar travamentos de cache
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) {
                 window.location.reload();
@@ -429,7 +428,7 @@
                 }
             }
 
-            // Fallback de segurança caso nenhum centésimo bata exatamente no modo exato restrito
+            // Se o modo for exato e a soma atual for estritamente menor que o alvo, ajusta os segundos/minutos se necessário ou acha o centésimo mais próximo que aproxime o total
             if (minDiff === 999 && forceMode === 'exact') {
                 for (let cs = 0; cs < 100; cs++) {
                     let csStr = String(cs).padStart(2, '0');
