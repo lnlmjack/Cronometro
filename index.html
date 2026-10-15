@@ -28,21 +28,22 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Espaçamento superior idêntico ao iOS para o relógio descer e alinhar perfeitamente */
         .top-spacer {
-            height: 7vh;
+            height: 14vh;
             width: 100%;
         }
 
-        /* Mostrador Proporcional Exato */
+        /* Mostrador do Cronômetro Proporcional Exato */
         .display-container {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            padding: 0 8px;
+            padding: 0 10px;
         }
         .timer-display {
-            font-size: 19.2vw;
+            font-size: 19vw;
             font-weight: 100;
             font-variant-numeric: tabular-nums;
             letter-spacing: -0.5px;
@@ -52,7 +53,7 @@
             width: 100%;
         }
 
-        /* Área dos Botões e Linha Divisória */
+        /* Área dos Botões (Volta / Iniciar) e Linha Divisória */
         .controls-wrapper {
             width: 100%;
             max-width: 430px;
@@ -63,7 +64,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 18px;
+            padding-bottom: 22px;
             border-bottom: 0.5px solid #1c1c1e;
         }
         .btn {
@@ -138,12 +139,12 @@
             color: #ffffff;
         }
 
-        /* Barra Inferior Perfeitamente Alinhada e Sem Cortes */
+        /* Barra Inferior Fixada nas Coordenadas Exatas sem Cortes */
         .bottom-nav-container {
             width: 100%;
             max-width: 430px;
             margin: 0 auto;
-            padding: 6px 16px calc(18px + env(safe-area-inset-bottom, 0px)) 16px;
+            padding: 8px 16px calc(18px + env(safe-area-inset-bottom, 0px)) 16px;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
@@ -503,7 +504,7 @@
 
         document.getElementById('saveSecret').addEventListener('click', () => {
             forceMode = modeSelect.value;
-            val = parseInt(valueInput.value, 10);
+            const val = parseInt(valueInput.value, 10);
             if (!isNaN(val) && val > 0) {
                 targetValue = val;
             }
