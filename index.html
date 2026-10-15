@@ -127,7 +127,7 @@
         .laps-area {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 49vh);
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 85px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 76px);
             left: 0;
             right: 0;
             width: 100%;
@@ -145,10 +145,10 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior Estável */
+        /* 4. Barra Inferior Ajustada Exatamente na Altura Correta (Sem cortar) */
         .bottom-nav-container {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
             left: 0;
             right: 0;
             width: 100%;
@@ -428,8 +428,7 @@
                 }
             }
 
-            // Se o modo for exato e a soma atual for estritamente menor que o alvo, ajusta os segundos/minutos se necessário ou acha o centésimo mais próximo que aproxime o total
-            if (minDiff === 999 && forceMode === 'exact') {
+            if (minDiff === 999) {
                 for (let cs = 0; cs < 100; cs++) {
                     let csStr = String(cs).padStart(2, '0');
                     let totalSum = baseSum + sumDigits(csStr);
