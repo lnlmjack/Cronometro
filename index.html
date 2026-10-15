@@ -16,33 +16,29 @@
         html, body {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             background-color: #000000;
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            position: fixed;
+            inset: 0;
             -webkit-font-smoothing: antialiased;
         }
 
-        .top-spacer {
-            height: 9.5vh;
-            width: 100%;
-        }
-
-        /* Mostrador Proporcional Exato */
+        /* 1. Mostrador do Relógio posicionado exatamente na proporção original */
         .display-container {
+            position: absolute;
+            top: 15.5vh;
+            left: 0;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
-            padding: 0 10px;
         }
         .timer-display {
-            font-size: 19.5vw;
+            font-size: 19.2vw;
             font-weight: 100;
             font-variant-numeric: tabular-nums;
             letter-spacing: -0.5px;
@@ -52,25 +48,27 @@
             width: 100%;
         }
 
-        /* Área dos Botões (Volta / Iniciar) e Linha Divisória */
+        /* 2. Botões Volta / Iniciar e Linha Divisória */
         .controls-wrapper {
+            position: absolute;
+            top: 42.5vh;
+            left: 0;
+            right: 0;
             width: 100%;
-            max-width: 430px;
-            margin: 0 auto;
-            padding: 0 16px;
+            padding: 0 18px;
         }
         .controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 20px;
+            padding-bottom: 22px;
             border-bottom: 0.5px solid #1c1c1e;
         }
         .btn {
             width: 20.5vw;
             height: 20.5vw;
-            max-width: 84px;
-            max-height: 84px;
+            max-width: 82px;
+            max-height: 82px;
             border-radius: 50%;
             border: none;
             font-size: 1.05rem;
@@ -119,13 +117,15 @@
             background-color: #ffffff;
         }
 
-        /* Lista de Voltas */
+        /* 3. Lista de Voltas */
         .laps-area {
-            flex: 1;
+            position: absolute;
+            top: 54.5vh;
+            bottom: 12vh;
+            left: 0;
+            right: 0;
             width: 100%;
-            max-width: 430px;
-            margin: 0 auto;
-            padding: 0 16px;
+            padding: 0 18px;
             overflow-y: auto;
         }
         .lap-row {
@@ -138,12 +138,14 @@
             color: #ffffff;
         }
 
-        /* Barra Inferior Perfeitamente Alinhada e Sem Cortes */
+        /* 4. Barra Inferior com distanciamento milimétrico exato */
         .bottom-nav-container {
+            position: absolute;
+            bottom: 3.2vh;
+            left: 0;
+            right: 0;
             width: 100%;
-            max-width: 430px;
-            margin: 0 auto;
-            padding: 4px 16px calc(10px + env(safe-area-inset-bottom, 0px)) 16px;
+            padding: 0 18px;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
@@ -250,9 +252,8 @@
 </head>
 <body>
 
-    <div class="top-spacer" id="secretTriggerTop"></div>
-
-    <div class="display-container">
+    <!-- 3 toques rápidos no topo ou no ícone do cronômetro abrem o menu secreto -->
+    <div class="display-container" id="secretTriggerTop">
         <div class="timer-display" id="display">00:00,00</div>
     </div>
 
