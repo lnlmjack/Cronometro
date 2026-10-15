@@ -17,7 +17,7 @@
             margin: 0;
             padding: 0;
             width: 100vw;
-            height: 100vh;
+            height: 100dvh;
             background-color: #000000;
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
@@ -115,7 +115,7 @@
         .laps-area {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 49vh);
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
+            bottom: 110px;
             left: 0;
             right: 0;
             width: 100%;
@@ -134,11 +134,11 @@
 
         .bottom-nav-container {
             position: absolute;
-            bottom: env(safe-area-inset-bottom, 0px);
+            bottom: max(env(safe-area-inset-bottom, 0px), 24px);
             left: 0;
             right: 0;
             width: 100%;
-            padding: 0 20px 8px 20px;
+            padding: 0 20px;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
