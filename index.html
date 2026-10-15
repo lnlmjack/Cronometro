@@ -120,7 +120,7 @@
         .laps-area {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 49vh);
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 13vh);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 76px);
             left: 0;
             right: 0;
             width: 100%;
@@ -137,10 +137,10 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior */
+        /* 4. Barra Inferior Estável e Posicionada Definitivamente (Sem Corte) */
         .bottom-nav-container {
             position: absolute;
-            bottom: max(env(safe-area-inset-bottom, 0px), 12px);
+            bottom: max(env(safe-area-inset-bottom, 0px), 4px);
             left: 0;
             right: 0;
             width: 100%;
@@ -331,7 +331,7 @@
             <label for="forceMode">Tipo de Forçagem:</label>
             <select id="forceMode">
                 <option value="multiple">Múltiplo de (Ex: 9 -> 9, 18, 27)</option>
-                <option value="exact">Soma Exata (Ex: sempre 15 ou 27)</option>
+                <option value="exact">Soma Exata (Ex: sempre 27)</option>
                 <option value="off">Desativado (Cronômetro Normal)</option>
             </select>
 
@@ -346,7 +346,6 @@
     </div>
 
     <script>
-        // Evita o travamento de cache do PWA ao reabrir no iOS
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) {
                 window.location.reload();
@@ -388,64 +387,63 @@
                 return formatTime(ms);
             }
 
-            const actualMinutes = Math.floor(ms / 60000);
-            const actualSeconds = Math.floor((ms % 60000) / 1000);
+            const minutes = Math.floor(ms / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
             const actualCs = Math.floor((ms % 1000) / 10);
 
-            let bestMin = actualMinutes;
-            let bestSec = actualSeconds;
-            let bestCs = actualCs;
-            let minDiff = 999999;
+            const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const baseSum = sumDigits(minSecStr);
 
-            // Se for modo de soma exata e o tempo capturado for muito baixo para o alvo (ex: alvo 27 e tempo 0s), 
-            // ajusta inteligentemente o tempo base para que a soma atinja exatamente o valor alvo configurado.
-            for (let m = 0; m <= 5; m++) {
+            let bestCs = actualCs;
+            let minDiff = 999;
+
+            // Procura o centésimo mais próximo do momento do clique cuja soma total atinja o alvo exato
+            for (let cs = 0; cs < 100; cs++) {
+                let csStr = String(cs).padStart(2, '0');
+                let totalSum = baseSum + sumDigits(csStr);
+
+                let isMatch = false;
+                if (forceMode === 'exact') {
+                    isMatch = (totalSum === targetValue);
+                } else if (forceMode === 'multiple') {
+                    isMatch = (totalSum > 0 && totalSum % targetValue === 0);
+                }
+
+                if (isMatch) {
+                    let diff = Math.abs(cs - actualCs);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        bestCs = cs;
+                    }
+                }
+            }
+
+            // Se a soma natural dos minutos e segundos for menor que o alvo (ex: alvo 27 mas parou em 00:00),
+            // ajusta os segundos de forma natural e gradual para que o tempo faça sentido e a soma bata exata.
+            if (minDiff === 999 && forceMode === 'exact') {
+                let bestSec = seconds;
                 for (let s = 0; s < 60; s++) {
                     for (let cs = 0; cs < 100; cs++) {
-                        let mStr = String(m).padStart(2, '0');
                         let sStr = String(s).padStart(2, '0');
                         let csStr = String(cs).padStart(2, '0');
-                        
-                        let totalSum = sumDigits(mStr + sStr + csStr);
-
-                        let isMatch = false;
-                        if (forceMode === 'exact') {
-                            isMatch = (totalSum === targetValue);
-                        } else if (forceMode === 'multiple') {
-                            isMatch = (totalSum > 0 && totalSum % targetValue === 0);
-                        }
-
-                        if (isMatch) {
-                            let simulatedMs = (m * 60000) + (s * 1000) + (cs * 10);
+                        let totalSum = sumDigits(String(minutes).padStart(2, '0') + sStr + csStr);
+                        if (totalSum === targetValue) {
+                            let simulatedMs = (minutes * 60000) + (s * 1000) + (cs * 10);
                             let diff = Math.abs(simulatedMs - ms);
                             if (diff < minDiff) {
                                 minDiff = diff;
-                                bestMin = m;
                                 bestSec = s;
                                 bestCs = cs;
                             }
                         }
                     }
                 }
-            }
-
-            // Fallback de segurança caso não encontre correspondência exata perfeita no range
-            if (minDiff === 999999) {
-                const minSecStr = `${String(actualMinutes).padStart(2, '0')}:${String(actualSeconds).padStart(2, '0')}`;
-                const baseSum = sumDigits(minSecStr);
-                for (let cs = 0; cs < 100; cs++) {
-                    let csStr = String(cs).padStart(2, '0');
-                    let totalSum = baseSum + sumDigits(csStr);
-                    let diff = Math.abs(totalSum - targetValue);
-                    if (diff < minDiff) {
-                        minDiff = diff;
-                        bestCs = cs;
-                    }
+                if (minDiff !== 999) {
+                    return `${String(minutes).padStart(2, '0')}:${String(bestSec).padStart(2, '0')},${String(bestCs).padStart(2, '0')}`;
                 }
-                return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
             }
 
-            return `${String(bestMin).padStart(2, '0')}:${String(bestSec).padStart(2, '0')},${String(bestCs).padStart(2, '0')}`;
+            return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
         }
 
         rightBtn.addEventListener('click', () => {
