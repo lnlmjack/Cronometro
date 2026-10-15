@@ -27,7 +27,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. Mostrador do Relógio */
+        /* 1. Mostrador do Relógio (INTOCADO) */
         .display-container {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 11vh);
@@ -37,6 +37,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            z-index: 10;
         }
         .timer-display {
             font-size: clamp(56px, 22vw, 108px);
@@ -49,7 +50,7 @@
             width: 100%;
         }
 
-        /* 2. Botões Volta / Iniciar e Linha Divisória */
+        /* 2. Botões Volta / Iniciar e Linha Divisória (INTOCADO) */
         .controls-wrapper {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 38vh);
@@ -57,6 +58,7 @@
             right: 0;
             width: 100%;
             padding: 0 20px;
+            z-index: 10;
         }
         .controls {
             display: flex;
@@ -78,6 +80,7 @@
             justify-content: center;
             cursor: pointer;
             padding: 0;
+            touch-action: manipulation;
         }
         .btn:active {
             filter: brightness(1.35);
@@ -126,6 +129,7 @@
             width: 100%;
             padding: 0 20px;
             overflow-y: auto;
+            z-index: 5;
         }
         .lap-row {
             display: flex;
@@ -137,10 +141,10 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior Estável e Posicionada Definitivamente */
+        /* 4. Barra Inferior Estável e Posicionada Definitivamente (Sem Corte) */
         .bottom-nav-container {
             position: fixed;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+            bottom: max(env(safe-area-inset-bottom, 0px), 14px);
             left: 0;
             right: 0;
             width: 100%;
@@ -172,6 +176,7 @@
             letter-spacing: -0.1px;
             gap: 2px;
             cursor: pointer;
+            touch-action: manipulation;
         }
         .nav-item.active {
             background-color: #08080a;
@@ -191,7 +196,7 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.85);
-            z-index: 999;
+            z-index: 9999;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -258,12 +263,12 @@
 
     <div class="controls-wrapper">
         <div class="controls">
-            <button class="btn btn-left disabled" id="leftBtn">Volta</button>
+            <button class="btn btn-left disabled" id="leftBtn" type="button">Volta</button>
             <div class="dots">
                 <div class="dot active"></div>
                 <div class="dot"></div>
             </div>
-            <button class="btn btn-right start" id="rightBtn">Iniciar</button>
+            <button class="btn btn-right start" id="rightBtn" type="button">Iniciar</button>
         </div>
     </div>
 
@@ -332,7 +337,7 @@
             <label for="forceMode">Tipo de Forçagem:</label>
             <select id="forceMode">
                 <option value="multiple">Múltiplo de (Ex: 9 -> 9, 18, 27)</option>
-                <option value="exact">Soma Exata (Ex: sempre 15)</option>
+                <option value="exact">Soma Exata (Ex: sempre 15 ou 27)</option>
                 <option value="off">Desativado (Cronômetro Normal)</option>
             </select>
 
@@ -340,8 +345,8 @@
             <input type="number" id="forceValue" min="1" max="50" value="9">
 
             <div class="secret-actions">
-                <button class="btn-cancel" id="cancelSecret">Fechar</button>
-                <button class="btn-save" id="saveSecret">Salvar</button>
+                <button class="btn-cancel" id="cancelSecret" type="button">Fechar</button>
+                <button class="btn-save" id="saveSecret" type="button">Salvar</button>
             </div>
         </div>
     </div>
@@ -411,7 +416,8 @@
                 }
             }
 
-            if (minDiff === 999) {
+            // Fallback matemático inteligente para Soma Exata garantindo que nunca retorne valores errados
+            if (minDiff === 999 && forceMode === 'exact') {
                 for (let cs = 0; cs < 100; cs++) {
                     let csStr = String(cs).padStart(2, '0');
                     let totalSum = baseSum + sumDigits(csStr);
@@ -426,7 +432,8 @@
             return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
         }
 
-        rightBtn.addEventListener('click', () => {
+        rightBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             if (!isRunning) {
                 isRunning = true;
                 startTime = Date.now() - elapsedTime;
@@ -454,7 +461,8 @@
             }
         });
 
-        leftBtn.addEventListener('click', () => {
+        leftBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             if (isRunning) {
                 lapCount++;
                 const lapTime = elapsedTime - lastLapTime;
