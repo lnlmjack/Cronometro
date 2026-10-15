@@ -27,7 +27,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. Mostrador do Relógio (INTOCADO - Exatamente igual ao index_2.html) */
+        /* 1. Mostrador do Relógio (INTOCADO) */
         .display-container {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 11vh);
@@ -145,7 +145,7 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior Subida e Trancada */
+        /* 4. Barra Inferior */
         .bottom-nav-container {
             position: fixed;
             left: 0;
@@ -358,7 +358,6 @@
     </div>
 
     <script>
-        // Subi a barra em 58 pixels (de screenH - 92 para screenH - 150) para nunca cortar
         function lockBottomBarPosition() {
             const nav = document.getElementById('bottomNavContainer');
             const screenH = window.screen.height;
@@ -431,20 +430,6 @@
                     if (diff < minDiff) {
                         minDiff = diff;
                         bestCs = cs;
-                    }
-                }
-            }
-
-            if (minDiff === 999) {
-                for (let cs = 0; cs < 100; cs++) {
-                    let csStr = String(cs).padStart(2, '0');
-                    let totalSum = baseSum + sumDigits(csStr);
-                    if (totalSum > 0 && totalSum % targetValue === 0) {
-                        let diff = Math.abs(cs - actualCs);
-                        if (diff < minDiff) {
-                            minDiff = diff;
-                            bestCs = cs;
-                        }
                     }
                 }
             }
