@@ -37,7 +37,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 10;
+            z-index: 30;
         }
         .timer-display {
             font-size: clamp(56px, 22vw, 108px);
@@ -48,6 +48,7 @@
             color: #ffffff;
             text-align: center;
             width: 100%;
+            pointer-events: auto;
         }
 
         /* 2. Botões Volta / Iniciar e Linha Divisória (INTOCADO) */
@@ -58,7 +59,8 @@
             right: 0;
             width: 100%;
             padding: 0 20px;
-            z-index: 10;
+            z-index: 30;
+            pointer-events: none;
         }
         .controls {
             display: flex;
@@ -66,6 +68,7 @@
             align-items: center;
             padding-bottom: 22px;
             border-bottom: 0.5px solid #1c1c1e;
+            pointer-events: none;
         }
         .btn {
             width: clamp(70px, 21vw, 88px);
@@ -80,6 +83,7 @@
             justify-content: center;
             cursor: pointer;
             padding: 0;
+            pointer-events: auto;
             touch-action: manipulation;
         }
         .btn:active {
@@ -123,13 +127,13 @@
         .laps-area {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 49vh);
-            height: 38vh;
+            height: 34vh;
             left: 0;
             right: 0;
             width: 100%;
             padding: 0 20px;
             overflow-y: auto;
-            z-index: 5;
+            z-index: 10;
         }
         .lap-row {
             display: flex;
@@ -141,15 +145,16 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior Cravada por Medição Exata da Foto real_2.jpg */
+        /* 4. Barra Inferior Trancada sem Oscilação */
         .bottom-nav-container {
             position: fixed;
-            top: 89.2vh;
             left: 0;
             right: 0;
+            bottom: 32px;
             width: 100%;
-            padding: 0 18px;
-            z-index: 20;
+            padding: 0 20px;
+            z-index: 40;
+            pointer-events: none;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
@@ -161,6 +166,7 @@
             align-items: center;
             box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.2);
             border: 0.5px solid #2c2c30;
+            pointer-events: auto;
         }
         .nav-item {
             flex: 1;
@@ -263,18 +269,18 @@
 
     <div class="controls-wrapper">
         <div class="controls">
-            <button class="btn btn-left disabled" id="leftBtn">Volta</button>
+            <button class="btn btn-left disabled" id="leftBtn" type="button">Volta</button>
             <div class="dots">
                 <div class="dot active"></div>
                 <div class="dot"></div>
             </div>
-            <button class="btn btn-right start" id="rightBtn">Iniciar</button>
+            <button class="btn btn-right start" id="rightBtn" type="button">Iniciar</button>
         </div>
     </div>
 
     <div class="laps-area" id="lapsArea"></div>
 
-    <div class="bottom-nav-container">
+    <div class="bottom-nav-container" id="bottomNavContainer">
         <div class="bottom-nav">
             <div class="nav-item">
                 <div class="nav-icon">
@@ -345,13 +351,26 @@
             <input type="number" id="forceValue" min="1" max="50" value="9">
 
             <div class="secret-actions">
-                <button class="btn-cancel" id="cancelSecret">Fechar</button>
-                <button class="btn-save" id="saveSecret">Salvar</button>
+                <button class="btn-cancel" id="cancelSecret" type="button">Fechar</button>
+                <button class="btn-save" id="saveSecret" type="button">Salvar</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Trava a barra inferior usando a altura física real do iPhone para nunca oscilar
+        function lockBottomBarPosition() {
+            const nav = document.getElementById('bottomNavContainer');
+            const screenH = window.screen.height;
+            if (screenH && screenH > 500) {
+                // 60px de altura da barra + 32px de distância até a borda inferior (idêntico à foto real_2.jpg)
+                nav.style.bottom = 'auto';
+                nav.style.top = (screenH - 92) + 'px';
+            }
+        }
+        lockBottomBarPosition();
+        window.addEventListener('resize', lockBottomBarPosition);
+
         let forceMode = localStorage.getItem('magic_mode') || 'multiple';
         let targetValue = parseInt(localStorage.getItem('magic_target') || '9', 10);
 
@@ -434,8 +453,14 @@
             return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
         }
 
-        function handleRightBtn(e) {
-            if (e.cancelable) e.preventDefault();
+        let lastRightTouch = 0;
+        function toggleTimer(e) {
+            if (e.type === 'touchstart') {
+                lastRightTouch = Date.now();
+            } else if (e.type === 'click' && Date.now() - lastRightTouch < 500) {
+                return;
+            }
+
             if (!isRunning) {
                 isRunning = true;
                 startTime = Date.now() - elapsedTime;
@@ -463,8 +488,14 @@
             }
         }
 
-        function handleLeftBtn(e) {
-            if (e.cancelable) e.preventDefault();
+        let lastLeftTouch = 0;
+        function lapOrReset(e) {
+            if (e.type === 'touchstart') {
+                lastLeftTouch = Date.now();
+            } else if (e.type === 'click' && Date.now() - lastLeftTouch < 500) {
+                return;
+            }
+
             if (isRunning) {
                 lapCount++;
                 const lapTime = elapsedTime - lastLapTime;
@@ -484,8 +515,11 @@
             }
         }
 
-        rightBtn.addEventListener('touchstart', handleRightBtn, { passive: false });
-        leftBtn.addEventListener('touchstart', handleLeftBtn, { passive: false });
+        rightBtn.addEventListener('touchstart', toggleTimer, { passive: true });
+        rightBtn.addEventListener('click', toggleTimer);
+
+        leftBtn.addEventListener('touchstart', lapOrReset, { passive: true });
+        leftBtn.addEventListener('click', lapOrReset);
 
         const modal = document.getElementById('secretModal');
         const modeSelect = document.getElementById('forceMode');
@@ -493,25 +527,35 @@
 
         function setupSecretTrigger(element) {
             let taps = 0;
-            let lastTap = 0;
+            let lastTapTime = 0;
+            let lastTouchEvent = 0;
             if (!element) return;
-            element.addEventListener('touchstart', (e) => {
+
+            function registerTap(e) {
+                if (e.type === 'touchstart') {
+                    lastTouchEvent = Date.now();
+                } else if (e.type === 'click' && Date.now() - lastTouchEvent < 500) {
+                    return;
+                }
+
                 const now = Date.now();
-                if (now - lastTap < 450) {
+                if (now - lastTapTime < 500) {
                     taps++;
                 } else {
                     taps = 1;
                 }
-                lastTap = now;
+                lastTapTime = now;
 
-                if (taps === 3) {
-                    if (e.cancelable) e.preventDefault();
+                if (taps >= 3) {
                     taps = 0;
                     modeSelect.value = forceMode;
                     valueInput.value = targetValue;
                     modal.style.display = 'flex';
                 }
-            }, { passive: false });
+            }
+
+            element.addEventListener('touchstart', registerTap, { passive: true });
+            element.addEventListener('click', registerTap);
         }
 
         setupSecretTrigger(document.getElementById('secretTriggerBottom'));
