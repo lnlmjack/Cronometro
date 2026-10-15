@@ -27,7 +27,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. Mostrador do Relógio (INTOCADO) */
+        /* 1. Mostrador do Relógio */
         .display-container {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 11vh);
@@ -37,7 +37,6 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 10;
         }
         .timer-display {
             font-size: clamp(56px, 22vw, 108px);
@@ -50,7 +49,7 @@
             width: 100%;
         }
 
-        /* 2. Botões Volta / Iniciar e Linha Divisória (INTOCADO) */
+        /* 2. Botões Volta / Iniciar e Linha Divisória */
         .controls-wrapper {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 38vh);
@@ -58,7 +57,6 @@
             right: 0;
             width: 100%;
             padding: 0 20px;
-            z-index: 10;
         }
         .controls {
             display: flex;
@@ -80,7 +78,6 @@
             justify-content: center;
             cursor: pointer;
             padding: 0;
-            touch-action: manipulation;
         }
         .btn:active {
             filter: brightness(1.35);
@@ -123,13 +120,12 @@
         .laps-area {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 49vh);
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 78px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 13vh);
             left: 0;
             right: 0;
             width: 100%;
             padding: 0 20px;
             overflow-y: auto;
-            z-index: 5;
         }
         .lap-row {
             display: flex;
@@ -141,15 +137,14 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior Estável e Posicionada Definitivamente (Sem Corte) */
+        /* 4. Barra Inferior */
         .bottom-nav-container {
-            position: fixed;
-            bottom: max(env(safe-area-inset-bottom, 0px), 14px);
+            position: absolute;
+            bottom: max(env(safe-area-inset-bottom, 0px), 12px);
             left: 0;
             right: 0;
             width: 100%;
             padding: 0 20px;
-            z-index: 99;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
@@ -176,7 +171,6 @@
             letter-spacing: -0.1px;
             gap: 2px;
             cursor: pointer;
-            touch-action: manipulation;
         }
         .nav-item.active {
             background-color: #08080a;
@@ -196,7 +190,7 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.85);
-            z-index: 9999;
+            z-index: 999;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -263,12 +257,12 @@
 
     <div class="controls-wrapper">
         <div class="controls">
-            <button class="btn btn-left disabled" id="leftBtn" type="button">Volta</button>
+            <button class="btn btn-left disabled" id="leftBtn">Volta</button>
             <div class="dots">
                 <div class="dot active"></div>
                 <div class="dot"></div>
             </div>
-            <button class="btn btn-right start" id="rightBtn" type="button">Iniciar</button>
+            <button class="btn btn-right start" id="rightBtn">Iniciar</button>
         </div>
     </div>
 
@@ -345,13 +339,20 @@
             <input type="number" id="forceValue" min="1" max="50" value="9">
 
             <div class="secret-actions">
-                <button class="btn-cancel" id="cancelSecret" type="button">Fechar</button>
-                <button class="btn-save" id="saveSecret" type="button">Salvar</button>
+                <button class="btn-cancel" id="cancelSecret">Fechar</button>
+                <button class="btn-save" id="saveSecret">Salvar</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Evita o travamento de cache do PWA ao reabrir no iOS
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
         let forceMode = localStorage.getItem('magic_mode') || 'multiple';
         let targetValue = parseInt(localStorage.getItem('magic_target') || '9', 10);
 
@@ -387,37 +388,51 @@
                 return formatTime(ms);
             }
 
-            const minutes = Math.floor(ms / 60000);
-            const seconds = Math.floor((ms % 60000) / 1000);
-            const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            const baseSum = sumDigits(minSecStr);
-
+            const actualMinutes = Math.floor(ms / 60000);
+            const actualSeconds = Math.floor((ms % 60000) / 1000);
             const actualCs = Math.floor((ms % 1000) / 10);
+
+            let bestMin = actualMinutes;
+            let bestSec = actualSeconds;
             let bestCs = actualCs;
-            let minDiff = 999;
+            let minDiff = 999999;
 
-            for (let cs = 0; cs < 100; cs++) {
-                let csStr = String(cs).padStart(2, '0');
-                let totalSum = baseSum + sumDigits(csStr);
+            // Se for modo de soma exata e o tempo capturado for muito baixo para o alvo (ex: alvo 27 e tempo 0s), 
+            // ajusta inteligentemente o tempo base para que a soma atinja exatamente o valor alvo configurado.
+            for (let m = 0; m <= 5; m++) {
+                for (let s = 0; s < 60; s++) {
+                    for (let cs = 0; cs < 100; cs++) {
+                        let mStr = String(m).padStart(2, '0');
+                        let sStr = String(s).padStart(2, '0');
+                        let csStr = String(cs).padStart(2, '0');
+                        
+                        let totalSum = sumDigits(mStr + sStr + csStr);
 
-                let isMatch = false;
-                if (forceMode === 'exact') {
-                    isMatch = (totalSum === targetValue);
-                } else if (forceMode === 'multiple') {
-                    isMatch = (totalSum > 0 && totalSum % targetValue === 0);
-                }
+                        let isMatch = false;
+                        if (forceMode === 'exact') {
+                            isMatch = (totalSum === targetValue);
+                        } else if (forceMode === 'multiple') {
+                            isMatch = (totalSum > 0 && totalSum % targetValue === 0);
+                        }
 
-                if (isMatch) {
-                    let diff = Math.abs(cs - actualCs);
-                    if (diff < minDiff) {
-                        minDiff = diff;
-                        bestCs = cs;
+                        if (isMatch) {
+                            let simulatedMs = (m * 60000) + (s * 1000) + (cs * 10);
+                            let diff = Math.abs(simulatedMs - ms);
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                bestMin = m;
+                                bestSec = s;
+                                bestCs = cs;
+                            }
+                        }
                     }
                 }
             }
 
-            // Fallback matemático inteligente para Soma Exata garantindo que nunca retorne valores errados
-            if (minDiff === 999 && forceMode === 'exact') {
+            // Fallback de segurança caso não encontre correspondência exata perfeita no range
+            if (minDiff === 999999) {
+                const minSecStr = `${String(actualMinutes).padStart(2, '0')}:${String(actualSeconds).padStart(2, '0')}`;
+                const baseSum = sumDigits(minSecStr);
                 for (let cs = 0; cs < 100; cs++) {
                     let csStr = String(cs).padStart(2, '0');
                     let totalSum = baseSum + sumDigits(csStr);
@@ -427,13 +442,13 @@
                         bestCs = cs;
                     }
                 }
+                return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
             }
 
-            return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
+            return `${String(bestMin).padStart(2, '0')}:${String(bestSec).padStart(2, '0')},${String(bestCs).padStart(2, '0')}`;
         }
 
-        rightBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        rightBtn.addEventListener('click', () => {
             if (!isRunning) {
                 isRunning = true;
                 startTime = Date.now() - elapsedTime;
@@ -461,8 +476,7 @@
             }
         });
 
-        leftBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        leftBtn.addEventListener('click', () => {
             if (isRunning) {
                 lapCount++;
                 const lapTime = elapsedTime - lastLapTime;
