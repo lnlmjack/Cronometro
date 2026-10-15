@@ -28,13 +28,12 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Espaçador superior para o mostrador alinhar idêntico ao iOS */
         .top-spacer {
-            height: 6vh;
+            height: 7.5vh;
             width: 100%;
         }
 
-        /* Mostrador Principal */
+        /* Mostrador Ajustado Milimetricamente */
         .display-container {
             display: flex;
             align-items: center;
@@ -43,17 +42,17 @@
             padding: 0 10px;
         }
         .timer-display {
-            font-size: 21.6vw;
+            font-size: 19.5vw;
             font-weight: 100;
             font-variant-numeric: tabular-nums;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.2px;
             line-height: 1;
             color: #ffffff;
             text-align: center;
             width: 100%;
         }
 
-        /* Área dos Botões (Volta / Iniciar) e Linha Divisória */
+        /* Área dos Botões e Linha Divisória */
         .controls-wrapper {
             width: 100%;
             max-width: 430px;
@@ -64,17 +63,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 18px;
+            padding-bottom: 16px;
             border-bottom: 1px solid #161618;
         }
         .btn {
-            width: 21.6vw;
-            height: 21.6vw;
-            max-width: 86px;
-            max-height: 86px;
+            width: 19.5vw;
+            height: 19.5vw;
+            max-width: 80px;
+            max-height: 80px;
             border-radius: 50%;
             border: none;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 400;
             letter-spacing: -0.2px;
             display: flex;
@@ -106,13 +105,13 @@
         /* Pontinhos Centrais */
         .dots {
             display: flex;
-            gap: 8.5px;
+            gap: 8px;
             align-items: center;
             justify-content: center;
         }
         .dot {
-            width: 7.5px;
-            height: 7.5px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background-color: #454549;
         }
@@ -134,23 +133,23 @@
             justify-content: space-between;
             padding: 12px 0;
             border-bottom: 1px solid #161618;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-variant-numeric: tabular-nums;
             color: #ffffff;
         }
 
-        /* Barra Inferior Estilo Pílula iOS (Sem cortes e alinhada) */
+        /* Barra Inferior Proporcional */
         .bottom-nav-container {
             width: 100%;
             max-width: 430px;
             margin: 0 auto;
-            padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px)) 16px;
+            padding: 6px 16px calc(10px + env(safe-area-inset-bottom, 0px)) 16px;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
-            border-radius: 46px;
+            border-radius: 44px;
             padding: 4px;
-            height: 66px;
+            height: 62px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -164,9 +163,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 40px;
+            border-radius: 38px;
             color: #e5e5ea;
-            font-size: 0.68rem;
+            font-size: 0.65rem;
             font-weight: 500;
             letter-spacing: -0.1px;
             gap: 2px;
@@ -177,8 +176,8 @@
             color: #ff9f0a;
         }
         .nav-icon {
-            width: 31px;
-            height: 31px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -253,12 +252,10 @@
 
     <div class="top-spacer" id="secretTriggerTop"></div>
 
-    <!-- Mostrador (3 toques rápidos aqui abrem o menu secreto) -->
     <div class="display-container">
         <div class="timer-display" id="display">00:00,00</div>
     </div>
 
-    <!-- Botões e Linha Divisória -->
     <div class="controls-wrapper">
         <div class="controls">
             <button class="btn btn-left disabled" id="leftBtn">Volta</button>
@@ -270,16 +267,13 @@
         </div>
     </div>
 
-    <!-- Espaço das Voltas -->
     <div class="laps-area" id="lapsArea"></div>
 
-    <!-- Barra Inferior Fiel ao iOS -->
     <div class="bottom-nav-container">
         <div class="bottom-nav">
-            <!-- Relógio -->
             <div class="nav-item">
                 <div class="nav-icon">
-                    <svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.6">
+                    <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.6">
                         <circle cx="12" cy="12" r="9.5"/>
                         <ellipse cx="12" cy="12" rx="4.8" ry="9.5"/>
                         <line x1="2.5" y1="12" x2="21.5" y2="12"/>
@@ -291,10 +285,9 @@
                 <span>Relógio</span>
             </div>
 
-            <!-- Alarmes -->
             <div class="nav-item">
                 <div class="nav-icon">
-                    <svg width="31" height="31" viewBox="0 0 24 24" fill="none">
+                    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
                         <path d="M3.2 6.4L6.8 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
                         <path d="M20.8 6.4L17.2 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
                         <circle cx="12" cy="12.8" r="8.5" fill="#ffffff"/>
@@ -306,10 +299,9 @@
                 <span>Alarmes</span>
             </div>
 
-            <!-- Cronômetro (3 toques abrem o menu secreto) -->
             <div class="nav-item active" id="secretTriggerBottom">
                 <div class="nav-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
                         <rect x="10.6" y="1.2" width="2.8" height="2.6" rx="0.8" fill="#ff9f0a"/>
                         <path d="M17.2 6.0L19.2 4.0" stroke="#ff9f0a" stroke-width="2.4" stroke-linecap="round"/>
                         <circle cx="12" cy="13.2" r="8.6" fill="#ff9f0a"/>
@@ -320,10 +312,9 @@
                 <span>Cronômetro</span>
             </div>
 
-            <!-- Timers -->
             <div class="nav-item">
                 <div class="nav-icon">
-                    <svg width="31" height="31" viewBox="0 0 24 24" fill="none">
+                    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
                         <path d="M12 2.8V6.2" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
                         <path d="M12 2.8 A 9.2 9.2 0 1 1 5.0 6.0" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
                         <path d="M12 12L8.2 8.4" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
@@ -335,7 +326,6 @@
         </div>
     </div>
 
-    <!-- Janela Secreta de Configuração -->
     <div class="secret-modal" id="secretModal">
         <div class="secret-box">
             <h3>Configuração Secreta</h3>
@@ -487,7 +477,6 @@
             }
         });
 
-        // Menu Secreto: 3 toques no ícone Cronômetro ou no topo
         const modal = document.getElementById('secretModal');
         const modeSelect = document.getElementById('forceMode');
         const valueInput = document.getElementById('forceValue');
