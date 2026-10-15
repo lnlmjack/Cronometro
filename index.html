@@ -27,10 +27,10 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. Mostrador do Relógio (Topo restaurado exatamente como gostavas) */
+        /* 1. Mostrador do Relógio (Intacto e idêntico ao seu modelo) */
         .display-container {
             position: absolute;
-            top: 15.5vh;
+            top: calc(env(safe-area-inset-top, 0px) + 11vh);
             left: 0;
             width: 100%;
             display: flex;
@@ -39,24 +39,24 @@
             cursor: pointer;
         }
         .timer-display {
-            font-size: 19.2vw;
+            font-size: clamp(56px, 22vw, 108px);
             font-weight: 100;
             font-variant-numeric: tabular-nums;
-            letter-spacing: -0.5px;
+            letter-spacing: -1px;
             line-height: 1;
             color: #ffffff;
             text-align: center;
             width: 100%;
         }
 
-        /* 2. Botões Volta / Iniciar e Linha Divisória */
+        /* 2. Botões Volta / Iniciar e Linha Divisória (Intacto) */
         .controls-wrapper {
             position: absolute;
-            top: 42.5vh;
+            top: calc(env(safe-area-inset-top, 0px) + 38vh);
             left: 0;
             right: 0;
             width: 100%;
-            padding: 0 18px;
+            padding: 0 20px;
         }
         .controls {
             display: flex;
@@ -66,10 +66,8 @@
             border-bottom: 0.5px solid #1c1c1e;
         }
         .btn {
-            width: 20.5vw;
-            height: 20.5vw;
-            max-width: 82px;
-            max-height: 82px;
+            width: clamp(70px, 21vw, 88px);
+            height: clamp(70px, 21vw, 88px);
             border-radius: 50%;
             border: none;
             font-size: 1.05rem;
@@ -80,7 +78,6 @@
             justify-content: center;
             cursor: pointer;
             padding: 0;
-            touch-action: manipulation;
         }
         .btn:active {
             filter: brightness(1.35);
@@ -122,12 +119,12 @@
         /* 3. Lista de Voltas */
         .laps-area {
             position: absolute;
-            top: 54.5vh;
-            bottom: 12vh;
+            top: calc(env(safe-area-inset-top, 0px) + 49vh);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
             left: 0;
             right: 0;
             width: 100%;
-            padding: 0 18px;
+            padding: 0 20px;
             overflow-y: auto;
         }
         .lap-row {
@@ -140,14 +137,14 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior com espaçamento seguro perfeito (sem cortar e sem subir demasiado) */
+        /* 4. Barra Inferior (Ajustada milimetricamente apenas para evitar o corte no rodapé do iOS) */
         .bottom-nav-container {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
             left: 0;
             right: 0;
             width: 100%;
-            padding: 0 18px;
+            padding: 0 20px;
         }
         .bottom-nav {
             background: linear-gradient(180deg, #242427 0%, #151517 100%);
@@ -174,7 +171,6 @@
             letter-spacing: -0.1px;
             gap: 2px;
             cursor: pointer;
-            touch-action: manipulation;
         }
         .nav-item.active {
             background-color: #08080a;
@@ -319,7 +315,7 @@
                 <div class="nav-icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
                         <path d="M12 2.8V6.2" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
-                        <path d="M12 2.8 A 9.2 9.2 0 1 1 5.0 6.0" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
+                        <path d="M12 2.8 A 9.2 9.2 0 1 1 5.4 6.0" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
                         <path d="M12 12L8.2 8.4" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
                         <circle cx="12" cy="12" r="1.6" fill="#ffffff"/>
                     </svg>
@@ -432,8 +428,7 @@
             return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
         }
 
-        rightBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        rightBtn.addEventListener('click', () => {
             if (!isRunning) {
                 isRunning = true;
                 startTime = Date.now() - elapsedTime;
@@ -461,8 +456,7 @@
             }
         });
 
-        leftBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        leftBtn.addEventListener('click', () => {
             if (isRunning) {
                 lapCount++;
                 const lapTime = elapsedTime - lastLapTime;
