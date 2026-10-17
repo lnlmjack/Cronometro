@@ -17,7 +17,6 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
             background-color: #000000;
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
@@ -30,7 +29,7 @@
             flex-direction: column;
             width: 100vw;
             height: 100vh;
-            height: 100dvh;
+            height: var(--app-height, 100vh);
             padding-top: env(safe-area-inset-top, 0px);
         }
 
@@ -250,7 +249,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.5</div>
+    <div class="version-tag">v1.6</div>
 
     <div class="app-container">
         <div class="display-container" id="secretTriggerTop">
@@ -349,6 +348,13 @@
     </div>
 
     <script>
+        function setAppHeight() {
+            document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+        }
+        setAppHeight();
+        window.addEventListener('resize', setAppHeight);
+        window.addEventListener('orientationchange', setAppHeight);
+
         let forceMode = localStorage.getItem('magic_mode') || 'multiple';
         let targetValue = parseInt(localStorage.getItem('magic_target') || '9', 10);
 
@@ -365,7 +371,12 @@
         const lapsArea = document.getElementById('lapsArea');
 
         function sumDigits(n) {
-            return String(n).split('').reduce((a, d) => a + parseInt(d, 10), 0);
+            const s = String(n);
+            let sum = 0;
+            for (let i = 0; i < s.length; i++) {
+                sum += s.charCodeAt(i) - 48;
+            }
+            return sum;
         }
 
         function formatTime(ms) {
@@ -385,16 +396,16 @@
             const actualCs = Math.floor((ms % 1000) / 10);
             const actualTotalCs = actualMinutes * 6000 + actualSeconds * 100 + actualCs;
 
-            let bestTotalCs = actualTotalCs;
+            let bestTotalCs = null;
             let minDiff = Infinity;
-            let found = false;
 
-            for (let mm = 0; mm < 100; mm++) {
+            for (let mm = 0; mm < 60; mm++) {
                 const mmSum = sumDigits(mm);
                 for (let ss = 0; ss < 60; ss++) {
                     const ssSum = sumDigits(ss);
+                    const partialSum = mmSum + ssSum;
                     for (let cs = 0; cs < 100; cs++) {
-                        const totalSum = mmSum + ssSum + sumDigits(cs);
+                        const totalSum = partialSum + sumDigits(cs);
 
                         let isMatch = false;
                         if (forceMode === 'exact') {
@@ -409,14 +420,13 @@
                             if (diff < minDiff) {
                                 minDiff = diff;
                                 bestTotalCs = totalCs;
-                                found = true;
                             }
                         }
                     }
                 }
             }
 
-            if (!found) {
+            if (bestTotalCs === null) {
                 return formatTime(ms);
             }
 
