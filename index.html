@@ -250,7 +250,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.4</div>
+    <div class="version-tag">v1.5</div>
 
     <div class="app-container">
         <div class="display-container" id="secretTriggerTop">
@@ -364,12 +364,8 @@
         const rightBtn = document.getElementById('rightBtn');
         const lapsArea = document.getElementById('lapsArea');
 
-        function sumDigits(str) {
-            let sum = 0;
-            for (let ch of str) {
-                if (ch >= '0' && ch <= '9') sum += parseInt(ch, 10);
-            }
-            return sum;
+        function sumDigits(n) {
+            return String(n).split('').reduce((a, d) => a + parseInt(d, 10), 0);
         }
 
         function formatTime(ms) {
@@ -384,39 +380,37 @@
                 return formatTime(ms);
             }
 
-            const minutes = Math.floor(ms / 60000);
+            const actualMinutes = Math.floor(ms / 60000);
             const actualSeconds = Math.floor((ms % 60000) / 1000);
             const actualCs = Math.floor((ms % 1000) / 10);
+            const actualTotalCs = actualMinutes * 6000 + actualSeconds * 100 + actualCs;
 
-            const minStr = String(minutes).padStart(2, '0');
-            const baseSum = sumDigits(minStr);
-
-            let bestSeconds = actualSeconds;
-            let bestCs = actualCs;
+            let bestTotalCs = actualTotalCs;
             let minDiff = Infinity;
             let found = false;
 
-            for (let s = 0; s < 60; s++) {
-                const sStr = String(s).padStart(2, '0');
-                const sSum = sumDigits(sStr);
-                for (let cs = 0; cs < 100; cs++) {
-                    const csStr = String(cs).padStart(2, '0');
-                    const totalSum = baseSum + sSum + sumDigits(csStr);
+            for (let mm = 0; mm < 100; mm++) {
+                const mmSum = sumDigits(mm);
+                for (let ss = 0; ss < 60; ss++) {
+                    const ssSum = sumDigits(ss);
+                    for (let cs = 0; cs < 100; cs++) {
+                        const totalSum = mmSum + ssSum + sumDigits(cs);
 
-                    let isMatch = false;
-                    if (forceMode === 'exact') {
-                        isMatch = (totalSum === targetValue);
-                    } else if (forceMode === 'multiple') {
-                        isMatch = (totalSum > 0 && totalSum % targetValue === 0);
-                    }
+                        let isMatch = false;
+                        if (forceMode === 'exact') {
+                            isMatch = (totalSum === targetValue);
+                        } else if (forceMode === 'multiple') {
+                            isMatch = (totalSum > 0 && totalSum % targetValue === 0);
+                        }
 
-                    if (isMatch) {
-                        const diff = Math.abs((s * 100 + cs) - (actualSeconds * 100 + actualCs));
-                        if (diff < minDiff) {
-                            minDiff = diff;
-                            bestSeconds = s;
-                            bestCs = cs;
-                            found = true;
+                        if (isMatch) {
+                            const totalCs = mm * 6000 + ss * 100 + cs;
+                            const diff = Math.abs(totalCs - actualTotalCs);
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                bestTotalCs = totalCs;
+                                found = true;
+                            }
                         }
                     }
                 }
@@ -426,7 +420,10 @@
                 return formatTime(ms);
             }
 
-            return `${minStr}:${String(bestSeconds).padStart(2, '0')},${String(bestCs).padStart(2, '0')}`;
+            const bm = Math.floor(bestTotalCs / 6000);
+            const bs = Math.floor((bestTotalCs % 6000) / 100);
+            const bc = bestTotalCs % 100;
+            return `${String(bm).padStart(2, '0')}:${String(bs).padStart(2, '0')},${String(bc).padStart(2, '0')}`;
         }
 
         rightBtn.addEventListener('click', () => {
