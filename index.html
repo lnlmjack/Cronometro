@@ -116,11 +116,11 @@
             background-color: #ffffff;
         }
 
-        /* 3. Lista de Voltas */
+        /* 3. Lista de Voltas (Com folga segura para a barra inferior não sobrepor) */
         .laps-area {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 49vh);
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 76px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 88px);
             left: 0;
             right: 0;
             width: 100%;
@@ -137,10 +137,10 @@
             color: #ffffff;
         }
 
-        /* 4. Barra Inferior Estável e Posicionada Definitivamente (Sem Corte) */
+        /* 4. Barra Inferior com espaçamento seguro blindado contra cortes */
         .bottom-nav-container {
             position: absolute;
-            bottom: max(env(safe-area-inset-bottom, 0px), 4px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
             left: 0;
             right: 0;
             width: 100%;
@@ -346,12 +346,6 @@
     </div>
 
     <script>
-        window.addEventListener('pageshow', (event) => {
-            if (event.persisted) {
-                window.location.reload();
-            }
-        });
-
         let forceMode = localStorage.getItem('magic_mode') || 'multiple';
         let targetValue = parseInt(localStorage.getItem('magic_target') || '9', 10);
 
@@ -391,42 +385,19 @@
             const seconds = Math.floor((ms % 60000) / 1000);
             const actualCs = Math.floor((ms % 1000) / 10);
 
-            const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            const baseSum = sumDigits(minSecStr);
-
-            let bestCs = actualCs;
-            let minDiff = 999;
-
-            // Procura o centésimo mais próximo do momento do clique cuja soma total atinja o alvo exato
-            for (let cs = 0; cs < 100; cs++) {
-                let csStr = String(cs).padStart(2, '0');
-                let totalSum = baseSum + sumDigits(csStr);
-
-                let isMatch = false;
-                if (forceMode === 'exact') {
-                    isMatch = (totalSum === targetValue);
-                } else if (forceMode === 'multiple') {
-                    isMatch = (totalSum > 0 && totalSum % targetValue === 0);
-                }
-
-                if (isMatch) {
-                    let diff = Math.abs(cs - actualCs);
-                    if (diff < minDiff) {
-                        minDiff = diff;
-                        bestCs = cs;
-                    }
-                }
-            }
-
-            // Se a soma natural dos minutos e segundos for menor que o alvo (ex: alvo 27 mas parou em 00:00),
-            // ajusta os segundos de forma natural e gradual para que o tempo faça sentido e a soma bata exata.
-            if (minDiff === 999 && forceMode === 'exact') {
+            if (forceMode === 'exact') {
                 let bestSec = seconds;
-                for (let s = 0; s < 60; s++) {
+                let bestCs = actualCs;
+                let minDiff = 999999;
+
+                // Procura nos segundos ao redor do tempo atual do clique para atingir exatamente a soma alvo de forma natural
+                for (let s = Math.max(0, seconds - 5); s <= Math.min(59, seconds + 5); s++) {
                     for (let cs = 0; cs < 100; cs++) {
+                        let mStr = String(minutes).padStart(2, '0');
                         let sStr = String(s).padStart(2, '0');
                         let csStr = String(cs).padStart(2, '0');
-                        let totalSum = sumDigits(String(minutes).padStart(2, '0') + sStr + csStr);
+                        let totalSum = sumDigits(mStr + sStr + csStr);
+
                         if (totalSum === targetValue) {
                             let simulatedMs = (minutes * 60000) + (s * 1000) + (cs * 10);
                             let diff = Math.abs(simulatedMs - ms);
@@ -438,8 +409,29 @@
                         }
                     }
                 }
-                if (minDiff !== 999) {
+
+                if (minDiff !== 999999) {
                     return `${String(minutes).padStart(2, '0')}:${String(bestSec).padStart(2, '0')},${String(bestCs).padStart(2, '0')}`;
+                }
+            }
+
+            // Modo Múltiplo
+            const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const baseSum = sumDigits(minSecStr);
+            let bestCs = actualCs;
+            let minDiff = 999;
+
+            for (let cs = 0; cs < 100; cs++) {
+                let csStr = String(cs).padStart(2, '0');
+                let totalSum = baseSum + sumDigits(csStr);
+                let isMatch = (totalSum > 0 && totalSum % targetValue === 0);
+
+                if (isMatch) {
+                    let diff = Math.abs(cs - actualCs);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        bestCs = cs;
+                    }
                 }
             }
 
