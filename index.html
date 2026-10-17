@@ -249,7 +249,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.6</div>
+    <div class="version-tag">v1.7</div>
 
     <div class="app-container">
         <div class="display-container" id="secretTriggerTop">
@@ -357,6 +357,9 @@
 
         let forceMode = localStorage.getItem('magic_mode') || 'multiple';
         let targetValue = parseInt(localStorage.getItem('magic_target') || '9', 10);
+        if (isNaN(targetValue) || targetValue <= 0) {
+            targetValue = 9;
+        }
 
         let startTime = 0;
         let elapsedTime = 0;
@@ -387,7 +390,7 @@
         }
 
         function getForcedTimeString(ms) {
-            if (forceMode === 'off' || targetValue <= 0) {
+            if (forceMode === 'off' || !targetValue || targetValue <= 0) {
                 return formatTime(ms);
             }
 
@@ -510,12 +513,13 @@
 
         document.getElementById('saveSecret').addEventListener('click', () => {
             forceMode = modeSelect.value;
-            const val = parseInt(valueInput.value, 10);
+            const rawVal = String(valueInput.value).trim();
+            const val = Number(rawVal);
             if (!isNaN(val) && val > 0) {
-                targetValue = val;
+                targetValue = Math.floor(val);
             }
             localStorage.setItem('magic_mode', forceMode);
-            localStorage.setItem('magic_target', targetValue);
+            localStorage.setItem('magic_target', String(targetValue));
             modal.style.display = 'none';
         });
 
