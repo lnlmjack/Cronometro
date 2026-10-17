@@ -42,7 +42,7 @@
             justify-content: center;
         }
         .timer-display {
-            font-size: clamp(56px, 22vw, 108px);
+            font-size: clamp(56px, 22vw, 104px);
             font-weight: 100;
             font-variant-numeric: tabular-nums;
             letter-spacing: -1px;
@@ -98,22 +98,6 @@
             color: #ff453a;
         }
 
-        .dots {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: center;
-        }
-        .dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background-color: #454549;
-        }
-        .dot.active {
-            background-color: #ffffff;
-        }
-
         .laps-area {
             flex: 1 1 auto;
             min-height: 0;
@@ -132,36 +116,32 @@
 
         .bottom-nav-container {
             flex: 0 0 auto;
-            padding: 0 20px calc(env(safe-area-inset-bottom, 0px) + 8px) 20px;
+            width: 100%;
         }
         .bottom-nav {
-            background: linear-gradient(180deg, #242427 0%, #151517 100%);
-            border-radius: 46px;
-            padding: 4px;
-            height: 60px;
+            width: 100%;
+            background-color: rgba(18, 18, 20, 0.94);
+            border-top: 0.5px solid #38383a;
+            padding-top: 6px;
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             align-items: center;
-            box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.2);
-            border: 0.5px solid #2c2c30;
         }
         .nav-item {
             flex: 1;
-            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 40px;
-            color: #e5e5ea;
+            color: #8e8e93;
             font-size: 0.65rem;
             font-weight: 500;
             letter-spacing: -0.1px;
-            gap: 2px;
+            gap: 3px;
             cursor: pointer;
         }
         .nav-item.active {
-            background-color: #08080a;
             color: #ff9f0a;
         }
         .nav-icon {
@@ -249,7 +229,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v1.7</div>
+    <div class="version-tag">v1.8</div>
 
     <div class="app-container">
         <div class="display-container" id="secretTriggerTop">
@@ -259,10 +239,6 @@
         <div class="controls-wrapper">
             <div class="controls">
                 <button class="btn btn-left disabled" id="leftBtn">Volta</button>
-                <div class="dots">
-                    <div class="dot active"></div>
-                    <div class="dot"></div>
-                </div>
                 <button class="btn btn-right start" id="rightBtn">Iniciar</button>
             </div>
         </div>
@@ -273,7 +249,7 @@
             <div class="bottom-nav">
                 <div class="nav-item">
                     <div class="nav-icon">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.6">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.6">
                             <circle cx="12" cy="12" r="9.5"/>
                             <ellipse cx="12" cy="12" rx="4.8" ry="9.5"/>
                             <line x1="2.5" y1="12" x2="21.5" y2="12"/>
@@ -288,12 +264,12 @@
                 <div class="nav-item">
                     <div class="nav-icon">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                            <path d="M3.2 6.4L6.8 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
-                            <path d="M20.8 6.4L17.2 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
-                            <circle cx="12" cy="12.8" r="8.5" fill="#ffffff"/>
+                            <path d="M3.2 6.4L6.8 3.0" stroke="#8e8e93" stroke-width="2.4" stroke-linecap="round"/>
+                            <path d="M20.8 6.4L17.2 3.0" stroke="#8e8e93" stroke-width="2.4" stroke-linecap="round"/>
+                            <circle cx="12" cy="12.8" r="8.5" fill="#8e8e93"/>
                             <path d="M12 7.8V12.8H8.6" stroke="#18181a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7.2 19.8L5.6 21.6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-                            <path d="M16.8 19.8L18.4 21.6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+                            <path d="M7.2 19.8L5.6 21.6" stroke="#8e8e93" stroke-width="2.2" stroke-linecap="round"/>
+                            <path d="M16.8 19.8L18.4 21.6" stroke="#8e8e93" stroke-width="2.2" stroke-linecap="round"/>
                         </svg>
                     </div>
                     <span>Alarmes</span>
@@ -315,10 +291,10 @@
                 <div class="nav-item">
                     <div class="nav-icon">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2.8V6.2" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
-                            <path d="M12 2.8 A 9.2 9.2 0 1 1 5.0 6.0" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
-                            <path d="M12 12L8.2 8.4" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
-                            <circle cx="12" cy="12" r="1.6" fill="#ffffff"/>
+                            <path d="M12 2.8V6.2" stroke="#8e8e93" stroke-width="2.1" stroke-linecap="round"/>
+                            <path d="M12 2.8 A 9.2 9.2 0 1 1 5.0 6.0" stroke="#8e8e93" stroke-width="2.1" stroke-linecap="round"/>
+                            <path d="M12 12L8.2 8.4" stroke="#8e8e93" stroke-width="2.1" stroke-linecap="round"/>
+                            <circle cx="12" cy="12" r="1.6" fill="#8e8e93"/>
                         </svg>
                     </div>
                     <span>Timers</span>
