@@ -98,6 +98,22 @@
             color: #ff453a;
         }
 
+        .dots {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #454549;
+        }
+        .dot.active {
+            background-color: #ffffff;
+        }
+
         .laps-area {
             flex: 1 1 auto;
             min-height: 0;
@@ -233,7 +249,7 @@
 </head>
 <body>
 
-    <div class="version-tag">v2.0</div>
+    <div class="version-tag">v2.1</div>
 
     <div class="app-container">
         <div class="display-container" id="secretTriggerTop">
@@ -243,6 +259,10 @@
         <div class="controls-wrapper">
             <div class="controls">
                 <button class="btn btn-left disabled" id="leftBtn">Volta</button>
+                <div class="dots">
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                </div>
                 <button class="btn btn-right start" id="rightBtn">Iniciar</button>
             </div>
         </div>
