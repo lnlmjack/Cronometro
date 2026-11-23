@@ -313,7 +313,7 @@
 
             <div class="nav-item">
                 <div class="nav-icon">
-                    <svg width="26" height="26" seco="24" viewBox="0 0 24 24" fill="none">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
                         <path d="M12 2.8V6.2" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
                         <path d="M12 2.8 A 9.2 9.2 0 1 1 5.4 6.0" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
                         <path d="M12 12L8.2 8.4" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
@@ -331,7 +331,7 @@
             <label for="forceMode">Tipo de Forçagem:</label>
             <select id="forceMode">
                 <option value="multiple">Múltiplo de (Ex: 9 -> 9, 18, 27)</option>
-                <option value="exact">Soma Exata (Ex: sempre 27)</option>
+                <option value="exact">Soma Exata (Ex: sempre 12)</option>
                 <option value="off">Desativado (Cronômetro Normal)</option>
             </select>
 
@@ -353,7 +353,6 @@
         let elapsedTime = 0;
         let lastLapTime = 0;
         let timerInterval = null;
-        let glideInterval = null;
         let isRunning = false;
         let lapCount = 0;
 
@@ -377,9 +376,9 @@
             return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(centiseconds).padStart(2, '0')}`;
         }
 
-        function getTargetMs(ms) {
+        function getForcedTimeString(ms) {
             if (forceMode === 'off' || targetValue <= 0) {
-                return ms;
+                return formatTime(ms);
             }
 
             const minutes = Math.floor(ms / 60000);
@@ -389,6 +388,7 @@
             const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             const baseSum = sumDigits(minSecStr);
 
+            // 1. Procura no mesmo segundo o centésimo mais próximo do instante atual
             let bestCs = null;
             let bestDist = Infinity;
 
@@ -409,57 +409,35 @@
             }
 
             if (bestCs !== null) {
-                return (minutes * 60000) + (seconds * 1000) + (bestCs * 10);
+                return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
             }
 
-            if (forceMode === 'exact') {
-                const startTotalCs = (minutes * 6000) + (seconds * 100) + actualCs;
-                const maxSearchCs = startTotalCs + 6000;
+            // 2. Se não houver opção no mesmo segundo, avança o mínimo necessário em centésimos
+            // para pegar o primeiro instante válido próximo (sem pular longe)
+            const startTotalCs = (minutes * 6000) + (seconds * 100) + actualCs;
+            const maxSearchCs = startTotalCs + 6000;
 
-                for (let totalCs = startTotalCs + 1; totalCs <= maxSearchCs; totalCs++) {
-                    const m = Math.floor(totalCs / 6000);
-                    const s = Math.floor((totalCs % 6000) / 100);
-                    const cs = totalCs % 100;
-                    const candidate = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(cs).padStart(2, '0')}`;
+            for (let totalCs = startTotalCs + 1; totalCs <= maxSearchCs; totalCs++) {
+                const m = Math.floor(totalCs / 6000);
+                const s = Math.floor((totalCs % 6000) / 100);
+                const cs = totalCs % 100;
+                const candidate = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(cs).padStart(2, '0')}`;
+                const totalSum = sumDigits(candidate);
 
-                    if (sumDigits(candidate) === targetValue) {
-                        return totalCs * 10;
-                    }
+                const isMatch = (forceMode === 'exact')
+                    ? (totalSum === targetValue)
+                    : (totalSum > 0 && totalSum % targetValue === 0);
+
+                if (isMatch) {
+                    return candidate;
                 }
             }
 
-            return ms;
-        }
-
-        function glideToTarget(fromMs, toMs) {
-            clearInterval(glideInterval);
-            if (toMs <= fromMs) {
-                elapsedTime = toMs;
-                display.textContent = formatTime(toMs);
-                return;
-            }
-
-            const totalDiff = toMs - fromMs;
-            const steps = Math.min(25, Math.max(6, Math.floor(totalDiff / 25)));
-            let currentStep = 0;
-
-            glideInterval = setInterval(() => {
-                currentStep++;
-                const progress = currentStep / steps;
-                const currentMs = Math.round(fromMs + totalDiff * progress);
-                display.textContent = formatTime(currentMs);
-
-                if (currentStep >= steps) {
-                    clearInterval(glideInterval);
-                    elapsedTime = toMs;
-                    display.textContent = formatTime(toMs);
-                }
-            }, 18);
+            return formatTime(ms);
         }
 
         rightBtn.addEventListener('click', () => {
             if (!isRunning) {
-                clearInterval(glideInterval);
                 isRunning = true;
                 startTime = Date.now() - elapsedTime;
                 timerInterval = setInterval(() => {
@@ -474,15 +452,15 @@
             } else {
                 clearInterval(timerInterval);
                 isRunning = false;
-                const rawElapsed = Date.now() - startTime;
-                const targetMs = getTargetMs(rawElapsed);
+                elapsedTime = Date.now() - startTime;
+
+                const finalStr = getForcedTimeString(elapsedTime);
+                display.textContent = finalStr;
 
                 rightBtn.className = 'btn btn-right start';
                 rightBtn.textContent = 'Iniciar';
                 leftBtn.className = 'btn btn-left';
                 leftBtn.textContent = 'Zerar';
-
-                glideToTarget(rawElapsed, targetMs);
             }
         });
 
@@ -496,7 +474,6 @@
                 row.innerHTML = `<span>Volta ${lapCount}</span><span>${formatTime(lapTime)}</span>`;
                 lapsArea.prepend(row);
             } else if (elapsedTime > 0) {
-                clearInterval(glideInterval);
                 elapsedTime = 0;
                 lastLapTime = 0;
                 lapCount = 0;
