@@ -388,8 +388,11 @@
             const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             const baseSum = sumDigits(minSecStr);
 
-            // 1. Tenta resolver apenas mudando os centésimos no segundo atual (priorizando cs >= actualCs)
-            for (let cs = actualCs; cs < 100; cs++) {
+            // 1. Busca no mesmo segundo (00 a 99) o centésimo mais próximo do instante atual
+            let bestCs = null;
+            let bestDist = Infinity;
+
+            for (let cs = 0; cs < 100; cs++) {
                 const csStr = String(cs).padStart(2, '0');
                 const totalSum = baseSum + sumDigits(csStr);
                 const isMatch = (forceMode === 'exact')
@@ -397,26 +400,23 @@
                     : (totalSum > 0 && totalSum % targetValue === 0);
 
                 if (isMatch) {
-                    return `${minSecStr},${csStr}`;
+                    const dist = Math.abs(cs - actualCs);
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        bestCs = cs;
+                    }
                 }
             }
 
-            for (let cs = 0; cs < actualCs; cs++) {
-                const csStr = String(cs).padStart(2, '0');
-                const totalSum = baseSum + sumDigits(csStr);
-                const isMatch = (forceMode === 'exact')
-                    ? (totalSum === targetValue)
-                    : (totalSum > 0 && totalSum % targetValue === 0);
-
-                if (isMatch) {
-                    return `${minSecStr},${csStr}`;
-                }
+            if (bestCs !== null) {
+                return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
             }
 
-            // 2. Se o segundo atual não alcança a soma alvo (ex: alvo 27 em 00:02,xx), avança para a frente no tempo (nunca volta atrás)
+            // 2. Se nenhum centésimo deste segundo atinge a soma exata, avança passo a passo nos centésimos
+            // para pegar a primeira opção válida mais próxima (nunca saltando direto para o fim)
             if (forceMode === 'exact') {
                 const startTotalCs = (minutes * 6000) + (seconds * 100) + actualCs;
-                const maxSearchCs = startTotalCs + 6000; // até +60s à frente
+                const maxSearchCs = startTotalCs + 6000;
 
                 for (let totalCs = startTotalCs + 1; totalCs <= maxSearchCs; totalCs++) {
                     const m = Math.floor(totalCs / 6000);
