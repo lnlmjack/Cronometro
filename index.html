@@ -16,33 +16,30 @@
         html, body {
             margin: 0;
             padding: 0;
-            width: 100%;
+            width: 100vw;
+            height: 100vh;
             background-color: #000000;
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
             overflow: hidden;
+            position: fixed;
+            inset: 0;
             -webkit-font-smoothing: antialiased;
         }
 
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            width: 100vw;
-            height: 100vh;
-            height: var(--app-height, 100vh);
-            padding-top: env(safe-area-inset-top, 0px);
-        }
-
+        /* 1. Mostrador do Relógio */
         .display-container {
-            flex: 0 0 auto;
-            margin-top: 9vh;
+            position: absolute;
+            top: calc(env(safe-area-inset-top, 0px) + 11vh);
+            left: 0;
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
         }
         .timer-display {
-            font-size: clamp(56px, 22vw, 104px);
+            font-size: clamp(56px, 22vw, 108px);
             font-weight: 100;
             font-variant-numeric: tabular-nums;
             letter-spacing: -1px;
@@ -52,9 +49,13 @@
             width: 100%;
         }
 
+        /* 2. Botões Volta / Iniciar e Linha Divisória */
         .controls-wrapper {
-            flex: 0 0 auto;
-            margin-top: 13vh;
+            position: absolute;
+            top: calc(env(safe-area-inset-top, 0px) + 38vh);
+            left: 0;
+            right: 0;
+            width: 100%;
             padding: 0 20px;
         }
         .controls {
@@ -63,7 +64,6 @@
             align-items: center;
             padding-bottom: 22px;
             border-bottom: 0.5px solid #1c1c1e;
-            position: relative;
         }
         .btn {
             width: clamp(70px, 21vw, 88px);
@@ -99,6 +99,7 @@
             color: #ff453a;
         }
 
+        /* Pontinhos Centrais */
         .dots {
             display: flex;
             gap: 8px;
@@ -115,11 +116,16 @@
             background-color: #ffffff;
         }
 
+        /* 3. Lista de Voltas */
         .laps-area {
-            flex: 1 1 auto;
-            min-height: 0;
-            overflow-y: auto;
+            position: absolute;
+            top: calc(env(safe-area-inset-top, 0px) + 49vh);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 88px);
+            left: 0;
+            right: 0;
+            width: 100%;
             padding: 0 20px;
+            overflow-y: auto;
         }
         .lap-row {
             display: flex;
@@ -131,20 +137,25 @@
             color: #ffffff;
         }
 
+        /* 4. Barra Inferior */
         .bottom-nav-container {
-            flex: 0 0 auto;
-            padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 10px) 16px;
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding: 0 20px;
         }
         .bottom-nav {
-            background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%);
-            border-radius: 9999px;
-            padding: 5px;
-            height: 58px;
+            background: linear-gradient(180deg, #242427 0%, #151517 100%);
+            border-radius: 46px;
+            padding: 4px;
+            height: 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.15), 0 2px 10px rgba(0,0,0,0.4);
-            border: 0.5px solid #38383a;
+            box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.2);
+            border: 0.5px solid #2c2c30;
         }
         .nav-item {
             flex: 1;
@@ -153,7 +164,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 9999px;
+            border-radius: 40px;
             color: #e5e5ea;
             font-size: 0.65rem;
             font-weight: 500;
@@ -162,7 +173,7 @@
             cursor: pointer;
         }
         .nav-item.active {
-            background-color: #000000;
+            background-color: #08080a;
             color: #ff9f0a;
         }
         .nav-icon {
@@ -173,6 +184,7 @@
             justify-content: center;
         }
 
+        /* Janela Secreta de Configuração */
         .secret-modal {
             display: none;
             position: fixed;
@@ -235,95 +247,80 @@
             background: #3a3a3c;
             color: #fff;
         }
-
-        .version-tag {
-            position: fixed;
-            top: calc(env(safe-area-inset-top, 0px) + 4px);
-            right: 8px;
-            font-size: 9px;
-            color: #3a3a3a;
-            opacity: 0.6;
-            z-index: 1000;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">v2.1</div>
+    <div class="display-container" id="secretTriggerTop">
+        <div class="timer-display" id="display">00:00,00</div>
+    </div>
 
-    <div class="app-container">
-        <div class="display-container" id="secretTriggerTop">
-            <div class="timer-display" id="display">00:00,00</div>
-        </div>
-
-        <div class="controls-wrapper">
-            <div class="controls">
-                <button class="btn btn-left disabled" id="leftBtn">Volta</button>
-                <div class="dots">
-                    <div class="dot active"></div>
-                    <div class="dot"></div>
-                </div>
-                <button class="btn btn-right start" id="rightBtn">Iniciar</button>
+    <div class="controls-wrapper">
+        <div class="controls">
+            <button class="btn btn-left disabled" id="leftBtn">Volta</button>
+            <div class="dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
             </div>
+            <button class="btn btn-right start" id="rightBtn">Iniciar</button>
         </div>
+    </div>
 
-        <div class="laps-area" id="lapsArea"></div>
+    <div class="laps-area" id="lapsArea"></div>
 
-        <div class="bottom-nav-container">
-            <div class="bottom-nav">
-                <div class="nav-item">
-                    <div class="nav-icon">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.6">
-                            <circle cx="12" cy="12" r="9.5"/>
-                            <ellipse cx="12" cy="12" rx="4.8" ry="9.5"/>
-                            <line x1="2.5" y1="12" x2="21.5" y2="12"/>
-                            <path d="M4.2 7.2C7 8.4 17 8.4 19.8 7.2"/>
-                            <path d="M4.2 16.8C7 15.6 17 15.6 19.8 16.8"/>
-                            <line x1="12" y1="2.5" x2="12" y2="21.5"/>
-                        </svg>
-                    </div>
-                    <span>Relógio</span>
+    <div class="bottom-nav-container">
+        <div class="bottom-nav">
+            <div class="nav-item">
+                <div class="nav-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.6">
+                        <circle cx="12" cy="12" r="9.5"/>
+                        <ellipse cx="12" cy="12" rx="4.8" ry="9.5"/>
+                        <line x1="2.5" y1="12" x2="21.5" y2="12"/>
+                        <path d="M4.2 7.2C7 8.4 17 8.4 19.8 7.2"/>
+                        <path d="M4.2 16.8C7 15.6 17 15.6 19.8 16.8"/>
+                        <line x1="12" y1="2.5" x2="12" y2="21.5"/>
+                    </svg>
                 </div>
+                <span>Relógio</span>
+            </div>
 
-                <div class="nav-item">
-                    <div class="nav-icon">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                            <path d="M3.2 6.4L6.8 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
-                            <path d="M20.8 6.4L17.2 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
-                            <circle cx="12" cy="12.8" r="8.5" fill="#ffffff"/>
-                            <path d="M12 7.8V12.8H8.6" stroke="#18181a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7.2 19.8L5.6 21.6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-                            <path d="M16.8 19.8L18.4 21.6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <span>Alarmes</span>
+            <div class="nav-item">
+                <div class="nav-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                        <path d="M3.2 6.4L6.8 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+                        <path d="M20.8 6.4L17.2 3.0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+                        <circle cx="12" cy="12.8" r="8.5" fill="#ffffff"/>
+                        <path d="M12 7.8V12.8H8.6" stroke="#18181a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7.2 19.8L5.6 21.6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+                        <path d="M16.8 19.8L18.4 21.6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+                    </svg>
                 </div>
+                <span>Alarmes</span>
+            </div>
 
-                <div class="nav-item active" id="secretTriggerBottom">
-                    <div class="nav-icon">
-                        <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-                            <rect x="10.6" y="1.2" width="2.8" height="2.6" rx="0.8" fill="#ff9f0a"/>
-                            <path d="M17.2 6.0L19.2 4.0" stroke="#ff9f0a" stroke-width="2.4" stroke-linecap="round"/>
-                            <circle cx="12" cy="13.2" r="8.6" fill="#ff9f0a"/>
-                            <circle cx="12" cy="13.2" r="1.5" fill="#08080a"/>
-                            <path d="M12 13.2V7.2" stroke="#08080a" stroke-width="2.1" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <span>Cronômetro</span>
+            <div class="nav-item active" id="secretTriggerBottom">
+                <div class="nav-icon">
+                    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+                        <rect x="10.6" y="1.2" width="2.8" height="2.6" rx="0.8" fill="#ff9f0a"/>
+                        <path d="M17.2 6.0L19.2 4.0" stroke="#ff9f0a" stroke-width="2.4" stroke-linecap="round"/>
+                        <circle cx="12" cy="13.2" r="8.6" fill="#ff9f0a"/>
+                        <circle cx="12" cy="13.2" r="1.5" fill="#08080a"/>
+                        <path d="M12 13.2V7.2" stroke="#08080a" stroke-width="2.1" stroke-linecap="round"/>
+                    </svg>
                 </div>
+                <span>Cronômetro</span>
+            </div>
 
-                <div class="nav-item">
-                    <div class="nav-icon">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2.8V6.2" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
-                            <path d="M12 2.8 A 9.2 9.2 0 1 1 5.0 6.0" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
-                            <path d="M12 12L8.2 8.4" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
-                            <circle cx="12" cy="12" r="1.6" fill="#ffffff"/>
-                        </svg>
-                    </div>
-                    <span>Timers</span>
+            <div class="nav-item">
+                <div class="nav-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2.8V6.2" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
+                        <path d="M12 2.8 A 9.2 9.2 0 1 1 5.4 6.0" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
+                        <path d="M12 12L8.2 8.4" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round"/>
+                        <circle cx="12" cy="12" r="1.6" fill="#ffffff"/>
+                    </svg>
                 </div>
+                <span>Timers</span>
             </div>
         </div>
     </div>
@@ -349,18 +346,8 @@
     </div>
 
     <script>
-        function setAppHeight() {
-            document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
-        }
-        setAppHeight();
-        window.addEventListener('resize', setAppHeight);
-        window.addEventListener('orientationchange', setAppHeight);
-
         let forceMode = localStorage.getItem('magic_mode') || 'multiple';
         let targetValue = parseInt(localStorage.getItem('magic_target') || '9', 10);
-        if (isNaN(targetValue) || targetValue <= 0) {
-            targetValue = 9;
-        }
 
         let startTime = 0;
         let elapsedTime = 0;
@@ -374,11 +361,10 @@
         const rightBtn = document.getElementById('rightBtn');
         const lapsArea = document.getElementById('lapsArea');
 
-        function sumDigits(n) {
-            const s = String(n);
+        function sumDigits(str) {
             let sum = 0;
-            for (let i = 0; i < s.length; i++) {
-                sum += s.charCodeAt(i) - 48;
+            for (let ch of str) {
+                if (ch >= '0' && ch <= '9') sum += parseInt(ch, 10);
             }
             return sum;
         }
@@ -391,53 +377,65 @@
         }
 
         function getForcedTimeString(ms) {
-            if (forceMode === 'off' || !targetValue || targetValue <= 0) {
+            if (forceMode === 'off' || targetValue <= 0) {
                 return formatTime(ms);
             }
 
-            const actualMinutes = Math.floor(ms / 60000);
-            const actualSeconds = Math.floor((ms % 60000) / 1000);
+            const minutes = Math.floor(ms / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
             const actualCs = Math.floor((ms % 1000) / 10);
-            const actualTotalCs = actualMinutes * 6000 + actualSeconds * 100 + actualCs;
 
-            let bestTotalCs = null;
-            let minDiff = Infinity;
+            // Minutos e segundos permanecem fixos no momento do clique (nunca voltam no tempo)
+            const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const baseSum = sumDigits(minSecStr);
 
-            for (let mm = 0; mm < 60; mm++) {
-                const mmSum = sumDigits(mm);
-                for (let ss = 0; ss < 60; ss++) {
-                    const ssSum = sumDigits(ss);
-                    const partialSum = mmSum + ssSum;
-                    for (let cs = 0; cs < 100; cs++) {
-                        const totalSum = partialSum + sumDigits(cs);
+            let bestCs = null;
+            let minDiff = 999;
 
-                        let isMatch = false;
-                        if (forceMode === 'exact') {
-                            isMatch = (totalSum === targetValue);
-                        } else if (forceMode === 'multiple') {
-                            isMatch = (totalSum > 0 && totalSum % targetValue === 0);
-                        }
+            // Prioriza centésimos a partir do clique atual (cs >= actualCs) para nunca regredir
+            for (let cs = actualCs; cs < 100; cs++) {
+                const csStr = String(cs).padStart(2, '0');
+                const totalSum = baseSum + sumDigits(csStr);
 
-                        if (isMatch) {
-                            const totalCs = mm * 6000 + ss * 100 + cs;
-                            const diff = Math.abs(totalCs - actualTotalCs);
-                            if (diff < minDiff) {
-                                minDiff = diff;
-                                bestTotalCs = totalCs;
-                            }
+                const isMatch = (forceMode === 'exact')
+                    ? (totalSum === targetValue)
+                    : (totalSum > 0 && totalSum % targetValue === 0);
+
+                if (isMatch) {
+                    const diff = cs - actualCs;
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        bestCs = cs;
+                    }
+                }
+            }
+
+            // Se não houver correspondência para frente no mesmo segundo, busca em centésimos anteriores sem alterar minutos/segundos
+            if (bestCs === null) {
+                for (let cs = 0; cs < actualCs; cs++) {
+                    const csStr = String(cs).padStart(2, '0');
+                    const totalSum = baseSum + sumDigits(csStr);
+
+                    const isMatch = (forceMode === 'exact')
+                        ? (totalSum === targetValue)
+                        : (totalSum > 0 && totalSum % targetValue === 0);
+
+                    if (isMatch) {
+                        const diff = actualCs - cs;
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            bestCs = cs;
                         }
                     }
                 }
             }
 
-            if (bestTotalCs === null) {
+            // Se ainda assim nenhum centésimo deste segundo atingir a soma exata, mantém o tempo real sem voltar atrás
+            if (bestCs === null) {
                 return formatTime(ms);
             }
 
-            const bm = Math.floor(bestTotalCs / 6000);
-            const bs = Math.floor((bestTotalCs % 6000) / 100);
-            const bc = bestTotalCs % 100;
-            return `${String(bm).padStart(2, '0')}:${String(bs).padStart(2, '0')},${String(bc).padStart(2, '0')}`;
+            return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
         }
 
         rightBtn.addEventListener('click', () => {
@@ -464,7 +462,7 @@
                 rightBtn.className = 'btn btn-right start';
                 rightBtn.textContent = 'Iniciar';
                 leftBtn.className = 'btn btn-left';
-                leftBtn.textContent = 'Volta';
+                leftBtn.textContent = 'Zerar';
             }
         });
 
@@ -495,6 +493,7 @@
         function setupSecretTrigger(element) {
             let taps = 0;
             let timer = null;
+            if (!element) return;
             element.addEventListener('click', () => {
                 taps++;
                 clearTimeout(timer);
@@ -504,7 +503,7 @@
                     valueInput.value = targetValue;
                     modal.style.display = 'flex';
                 } else {
-                    timer = setTimeout(() => { taps = 0; }, 450);
+                    timer = setTimeout(() => { taps = 0; }, 500);
                 }
             });
         }
@@ -514,13 +513,12 @@
 
         document.getElementById('saveSecret').addEventListener('click', () => {
             forceMode = modeSelect.value;
-            const rawVal = String(valueInput.value).trim();
-            const val = Number(rawVal);
+            const val = parseInt(valueInput.value, 10);
             if (!isNaN(val) && val > 0) {
-                targetValue = Math.floor(val);
+                targetValue = val;
             }
             localStorage.setItem('magic_mode', forceMode);
-            localStorage.setItem('magic_target', String(targetValue));
+            localStorage.setItem('magic_target', targetValue);
             modal.style.display = 'none';
         });
 
