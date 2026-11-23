@@ -331,12 +331,12 @@
             <label for="forceMode">Tipo de Forçagem:</label>
             <select id="forceMode">
                 <option value="multiple">Múltiplo de (Ex: 9 -> 9, 18, 27)</option>
-                <option value="exact">Soma Exata (Ex: sempre 15)</option>
+                <option value="exact">Soma Exata (Ex: sempre 27)</option>
                 <option value="off">Desativado (Cronômetro Normal)</option>
             </select>
 
             <label for="forceValue">Número Alvo:</label>
-            <input type="number" id="forceValue" min="1" max="50" value="9">
+            <input type="number" id="forceValue" min="1" max="54" value="9">
 
             <div class="secret-actions">
                 <button class="btn-cancel" id="cancelSecret">Fechar</button>
@@ -385,57 +385,52 @@
             const seconds = Math.floor((ms % 60000) / 1000);
             const actualCs = Math.floor((ms % 1000) / 10);
 
-            // Minutos e segundos permanecem fixos no momento do clique (nunca voltam no tempo)
             const minSecStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             const baseSum = sumDigits(minSecStr);
 
-            let bestCs = null;
-            let minDiff = 999;
-
-            // Prioriza centésimos a partir do clique atual (cs >= actualCs) para nunca regredir
+            // 1. Tenta resolver apenas mudando os centésimos no segundo atual (priorizando cs >= actualCs)
             for (let cs = actualCs; cs < 100; cs++) {
                 const csStr = String(cs).padStart(2, '0');
                 const totalSum = baseSum + sumDigits(csStr);
-
                 const isMatch = (forceMode === 'exact')
                     ? (totalSum === targetValue)
                     : (totalSum > 0 && totalSum % targetValue === 0);
 
                 if (isMatch) {
-                    const diff = cs - actualCs;
-                    if (diff < minDiff) {
-                        minDiff = diff;
-                        bestCs = cs;
+                    return `${minSecStr},${csStr}`;
+                }
+            }
+
+            for (let cs = 0; cs < actualCs; cs++) {
+                const csStr = String(cs).padStart(2, '0');
+                const totalSum = baseSum + sumDigits(csStr);
+                const isMatch = (forceMode === 'exact')
+                    ? (totalSum === targetValue)
+                    : (totalSum > 0 && totalSum % targetValue === 0);
+
+                if (isMatch) {
+                    return `${minSecStr},${csStr}`;
+                }
+            }
+
+            // 2. Se o segundo atual não alcança a soma alvo (ex: alvo 27 em 00:02,xx), avança para a frente no tempo (nunca volta atrás)
+            if (forceMode === 'exact') {
+                const startTotalCs = (minutes * 6000) + (seconds * 100) + actualCs;
+                const maxSearchCs = startTotalCs + 6000; // até +60s à frente
+
+                for (let totalCs = startTotalCs + 1; totalCs <= maxSearchCs; totalCs++) {
+                    const m = Math.floor(totalCs / 6000);
+                    const s = Math.floor((totalCs % 6000) / 100);
+                    const cs = totalCs % 100;
+                    const candidate = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(cs).padStart(2, '0')}`;
+
+                    if (sumDigits(candidate) === targetValue) {
+                        return candidate;
                     }
                 }
             }
 
-            // Se não houver correspondência para frente no mesmo segundo, busca em centésimos anteriores sem alterar minutos/segundos
-            if (bestCs === null) {
-                for (let cs = 0; cs < actualCs; cs++) {
-                    const csStr = String(cs).padStart(2, '0');
-                    const totalSum = baseSum + sumDigits(csStr);
-
-                    const isMatch = (forceMode === 'exact')
-                        ? (totalSum === targetValue)
-                        : (totalSum > 0 && totalSum % targetValue === 0);
-
-                    if (isMatch) {
-                        const diff = actualCs - cs;
-                        if (diff < minDiff) {
-                            minDiff = diff;
-                            bestCs = cs;
-                        }
-                    }
-                }
-            }
-
-            // Se ainda assim nenhum centésimo deste segundo atingir a soma exata, mantém o tempo real sem voltar atrás
-            if (bestCs === null) {
-                return formatTime(ms);
-            }
-
-            return `${minSecStr},${String(bestCs).padStart(2, '0')}`;
+            return formatTime(ms);
         }
 
         rightBtn.addEventListener('click', () => {
